@@ -1,0 +1,2196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexaLeague — eFootball Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-void: #04040a;
+  --bg-deep: #080812;
+  --bg-card: #0d0d1e;
+  --bg-card2: #11112a;
+  --bg-hover: #161630;
+  --border: rgba(0,255,136,0.12);
+  --border2: rgba(0,207,255,0.12);
+  --neon-green: #00ff88;
+  --neon-cyan: #00cfff;
+  --neon-purple: #b347ff;
+  --neon-orange: #ff6b35;
+  --neon-pink: #ff2d7a;
+  --text-primary: #e8eaff;
+  --text-secondary: #7a7da8;
+  --text-muted: #4a4d6e;
+  --gold: #ffd700;
+  --silver: #c0c0c0;
+  --bronze: #cd7f32;
+  --danger: #ff3355;
+  --success: #00ff88;
+  --warning: #ffab00;
+  --font-head: 'Orbitron', monospace;
+  --font-body: 'Rajdhani', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --glow-green: 0 0 20px rgba(0,255,136,0.3);
+  --glow-cyan: 0 0 20px rgba(0,207,255,0.3);
+  --glow-purple: 0 0 20px rgba(179,71,255,0.3);
+  --transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg-void);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-size: 16px;
+  line-height: 1.5;
+}
+/* SCROLLBAR */
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--neon-green); border-radius:3px; }
+
+/* GRID BG */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events:none; z-index:0;
+}
+
+/* ===== PAGES ===== */
+.page { display:none; min-height:100vh; position:relative; z-index:1; }
+.page.active { display:block; animation: fadeSlide 0.3s ease; }
+@keyframes fadeSlide { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* ===== AUTH PAGE ===== */
+#page-auth {
+  display:none; align-items:center; justify-content:center;
+  min-height:100vh; padding:20px;
+}
+#page-auth.active { display:flex; }
+.auth-wrap { width:100%; max-width:440px; }
+.auth-logo { text-align:center; margin-bottom:40px; }
+.auth-logo .brand { font-family:var(--font-head); font-size:2rem; font-weight:900;
+  background:linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  letter-spacing:4px; }
+.auth-logo p { color:var(--text-secondary); font-size:0.85rem; margin-top:4px; letter-spacing:2px; }
+.auth-card {
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:36px;
+  box-shadow: 0 0 60px rgba(0,255,136,0.06);
+}
+.auth-tabs { display:flex; gap:4px; background:var(--bg-deep); border-radius:8px; padding:4px; margin-bottom:28px; }
+.auth-tab {
+  flex:1; text-align:center; padding:8px; border-radius:6px; cursor:pointer;
+  font-family:var(--font-head); font-size:0.7rem; letter-spacing:2px;
+  color:var(--text-secondary); transition:var(--transition);
+}
+.auth-tab.active { background:var(--neon-green); color:#000; font-weight:700; }
+.auth-form { display:none; }
+.auth-form.active { display:block; }
+.form-group { margin-bottom:18px; }
+.form-group label { display:block; font-size:0.78rem; letter-spacing:2px; color:var(--text-secondary); margin-bottom:8px; font-family:var(--font-head); }
+.form-group input, .form-group select, .form-group textarea {
+  width:100%; background:var(--bg-deep); border:1px solid var(--border);
+  border-radius:var(--radius-sm); padding:12px 14px; color:var(--text-primary);
+  font-family:var(--font-body); font-size:1rem; transition:var(--transition);
+  outline:none;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color:var(--neon-green); box-shadow: var(--glow-green);
+}
+.form-group select option { background: var(--bg-card); }
+.btn {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:12px 24px; border-radius:var(--radius-sm); border:none;
+  cursor:pointer; font-family:var(--font-head); font-size:0.72rem;
+  letter-spacing:2px; font-weight:700; transition:var(--transition);
+  text-decoration:none; white-space:nowrap;
+}
+.btn-primary {
+  background:linear-gradient(135deg, var(--neon-green), #00cc6e);
+  color:#000; width:100%; justify-content:center;
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow:var(--glow-green); }
+.btn-secondary {
+  background:transparent; border:1px solid var(--neon-green);
+  color:var(--neon-green);
+}
+.btn-secondary:hover { background:rgba(0,255,136,0.08); box-shadow:var(--glow-green); }
+.btn-cyan { background:linear-gradient(135deg,var(--neon-cyan),#0099cc); color:#000; }
+.btn-cyan:hover { transform:translateY(-2px); box-shadow:var(--glow-cyan); }
+.btn-purple { background:linear-gradient(135deg,var(--neon-purple),#8820cc); color:#fff; }
+.btn-purple:hover { transform:translateY(-2px); box-shadow:var(--glow-purple); }
+.btn-danger { background:rgba(255,51,85,0.15); border:1px solid var(--danger); color:var(--danger); }
+.btn-danger:hover { background:rgba(255,51,85,0.25); }
+.btn-sm { padding:7px 14px; font-size:0.65rem; }
+.btn-ghost { background:transparent; border:1px solid var(--border); color:var(--text-secondary); }
+.btn-ghost:hover { border-color:var(--neon-green); color:var(--neon-green); }
+.btn-icon { padding:8px; border-radius:8px; }
+
+/* ===== APP SHELL ===== */
+#app { display:none; height:100vh; flex-direction:column; }
+#app.active { display:flex; }
+.topbar {
+  height:60px; background:rgba(8,8,18,0.95);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px; position:sticky; top:0; z-index:100;
+  backdrop-filter:blur(20px);
+}
+.topbar-brand { font-family:var(--font-head); font-size:1.1rem; font-weight:900;
+  background:linear-gradient(135deg,var(--neon-green),var(--neon-cyan));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:3px; cursor:pointer; }
+.topbar-nav { display:flex; gap:4px; }
+.nav-btn {
+  padding:7px 14px; border-radius:6px; background:transparent; border:none;
+  color:var(--text-secondary); cursor:pointer; font-family:var(--font-head);
+  font-size:0.62rem; letter-spacing:1.5px; transition:var(--transition); display:flex; align-items:center; gap:6px;
+}
+.nav-btn:hover, .nav-btn.active { color:var(--neon-green); background:rgba(0,255,136,0.08); }
+.topbar-right { display:flex; align-items:center; gap:12px; }
+.notif-btn { position:relative; background:transparent; border:none; color:var(--text-secondary); cursor:pointer; padding:8px; }
+.notif-dot { position:absolute; top:6px; right:6px; width:8px; height:8px; background:var(--neon-green); border-radius:50%; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+.avatar-btn { width:36px; height:36px; border-radius:50%; border:2px solid var(--neon-green); overflow:hidden; cursor:pointer; }
+.avatar-btn img { width:100%; height:100%; object-fit:cover; }
+.avatar-placeholder { width:36px; height:36px; border-radius:50%; border:2px solid var(--neon-green); background:linear-gradient(135deg,var(--neon-green),var(--neon-cyan)); display:flex; align-items:center; justify-content:center; font-family:var(--font-head); font-weight:700; font-size:0.8rem; color:#000; cursor:pointer; }
+
+.main-content { flex:1; overflow-y:auto; }
+.section { display:none; padding:24px; max-width:1400px; margin:0 auto; }
+.section.active { display:block; animation:fadeSlide 0.3s ease; }
+
+/* ===== PANEL HEADERS ===== */
+.panel-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+.panel-hdr h2 { font-family:var(--font-head); font-size:1.1rem; font-weight:700; letter-spacing:3px;
+  background:linear-gradient(135deg,var(--text-primary),var(--neon-green));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.panel-hdr p { color:var(--text-secondary); font-size:0.85rem; }
+
+/* ===== CARDS ===== */
+.card {
+  background:var(--bg-card); border:1px solid var(--border);
+  border-radius:var(--radius); padding:20px; transition:var(--transition);
+}
+.card:hover { border-color:rgba(0,255,136,0.25); }
+.card-sm { padding:14px; }
+.card-glow { box-shadow: var(--glow-green); }
+
+/* ===== STATS GRID ===== */
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:16px; margin-bottom:24px; }
+.stat-card {
+  background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:20px; position:relative; overflow:hidden; transition:var(--transition);
+}
+.stat-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,var(--neon-green),var(--neon-cyan));
+}
+.stat-card:hover { transform:translateY(-3px); box-shadow:var(--glow-green); }
+.stat-icon { font-size:1.5rem; margin-bottom:10px; }
+.stat-value { font-family:var(--font-head); font-size:1.8rem; font-weight:900; color:var(--neon-green); }
+.stat-label { font-size:0.78rem; color:var(--text-secondary); letter-spacing:1px; margin-top:4px; }
+.stat-change { font-size:0.75rem; color:var(--success); margin-top:6px; }
+
+/* ===== GRID LAYOUTS ===== */
+.grid-2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; }
+.grid-3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; }
+.grid-4 { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; }
+
+/* ===== LEAGUE CARDS ===== */
+.league-card {
+  background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:24px; cursor:pointer; transition:var(--transition); position:relative; overflow:hidden;
+}
+.league-card::after {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(0,255,136,0.03),transparent);
+  opacity:0; transition:var(--transition);
+}
+.league-card:hover { transform:translateY(-4px); border-color:rgba(0,255,136,0.3); box-shadow:var(--glow-green); }
+.league-card:hover::after { opacity:1; }
+.league-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 10px;
+  border-radius:20px; font-size:0.68rem; font-weight:700; letter-spacing:1.5px;
+  font-family:var(--font-head); margin-bottom:12px; }
+.badge-free { background:rgba(0,255,136,0.15); color:var(--neon-green); border:1px solid rgba(0,255,136,0.3); }
+.badge-premium { background:rgba(255,215,0,0.12); color:var(--gold); border:1px solid rgba(255,215,0,0.3); }
+.badge-ongoing { background:rgba(0,207,255,0.12); color:var(--neon-cyan); border:1px solid rgba(0,207,255,0.3); }
+.badge-upcoming { background:rgba(179,71,255,0.12); color:var(--neon-purple); border:1px solid rgba(179,71,255,0.3); }
+.badge-completed { background:rgba(122,125,168,0.12); color:var(--text-secondary); border:1px solid rgba(122,125,168,0.3); }
+.badge-admin { background:rgba(255,107,53,0.15); color:var(--neon-orange); border:1px solid rgba(255,107,53,0.3); }
+.badge-player { background:rgba(0,255,136,0.12); color:var(--neon-green); border:1px solid rgba(0,255,136,0.3); }
+.badge-banned { background:rgba(255,51,85,0.12); color:var(--danger); border:1px solid rgba(255,51,85,0.3); }
+.league-card h3 { font-family:var(--font-head); font-size:1rem; font-weight:700; margin-bottom:8px; }
+.league-meta { display:flex; gap:16px; flex-wrap:wrap; margin-top:12px; }
+.league-meta span { font-size:0.8rem; color:var(--text-secondary); display:flex; align-items:center; gap:5px; }
+.league-prize { font-family:var(--font-head); font-size:1.2rem; color:var(--gold); font-weight:700; margin-top:12px; }
+.league-actions { display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
+.progress-bar { height:4px; background:var(--bg-deep); border-radius:2px; margin-top:12px; overflow:hidden; }
+.progress-fill { height:100%; background:linear-gradient(90deg,var(--neon-green),var(--neon-cyan)); border-radius:2px; transition:width 0.5s ease; }
+
+/* ===== TABLE ===== */
+.data-table { width:100%; border-collapse:collapse; }
+.data-table th {
+  background:var(--bg-deep); padding:12px 16px; text-align:left;
+  font-family:var(--font-head); font-size:0.65rem; letter-spacing:2px;
+  color:var(--text-secondary); border-bottom:1px solid var(--border); white-space:nowrap;
+}
+.data-table td { padding:14px 16px; border-bottom:1px solid rgba(255,255,255,0.04); font-size:0.9rem; vertical-align:middle; }
+.data-table tr:last-child td { border-bottom:none; }
+.data-table tr:hover td { background:var(--bg-hover); }
+.rank-1 { color:var(--gold); font-weight:700; }
+.rank-2 { color:var(--silver); font-weight:700; }
+.rank-3 { color:var(--bronze); font-weight:700; }
+.table-wrap { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); overflow:auto; }
+.pos-indicator { width:4px; height:20px; border-radius:2px; display:inline-block; margin-right:8px; }
+.pos-up { background:var(--neon-green); }
+.pos-down { background:var(--danger); }
+.pos-same { background:var(--text-muted); }
+
+/* ===== FIXTURE CARD ===== */
+.fixture-card {
+  background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:20px; display:grid; grid-template-columns:1fr auto 1fr; gap:16px; align-items:center;
+  transition:var(--transition);
+}
+.fixture-card:hover { border-color:rgba(0,255,136,0.2); }
+.fixture-team { text-align:center; }
+.fixture-team .name { font-family:var(--font-head); font-size:0.85rem; font-weight:600; margin-bottom:4px; }
+.fixture-team .avatar { width:44px; height:44px; border-radius:50%; border:2px solid var(--border);
+  background:linear-gradient(135deg,var(--neon-green),var(--neon-cyan));
+  display:flex; align-items:center; justify-content:center; margin:0 auto 8px;
+  font-family:var(--font-head); font-weight:700; font-size:0.8rem; color:#000; }
+.fixture-vs { text-align:center; }
+.fixture-vs .score { font-family:var(--font-head); font-size:1.8rem; font-weight:900;
+  background:linear-gradient(135deg,var(--neon-green),var(--neon-cyan));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.fixture-vs .vs { font-family:var(--font-head); font-size:0.9rem; color:var(--text-muted); }
+.fixture-meta { display:flex; justify-content:space-between; align-items:center; margin-top:12px; }
+.fixture-status { font-size:0.75rem; font-family:var(--font-head); letter-spacing:1.5px; }
+.status-live { color:var(--danger); animation:pulse 1.5s infinite; }
+.status-scheduled { color:var(--neon-cyan); }
+.status-done { color:var(--text-secondary); }
+
+/* ===== PROFILE ===== */
+.profile-hero {
+  background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:32px; position:relative; overflow:hidden; margin-bottom:24px;
+}
+.profile-hero::before {
+  content:''; position:absolute; top:-50%; right:-10%; width:400px; height:400px;
+  background:radial-gradient(circle,rgba(0,255,136,0.08),transparent);
+  pointer-events:none;
+}
+.profile-top { display:flex; align-items:flex-start; gap:24px; flex-wrap:wrap; }
+.profile-avatar { width:90px; height:90px; border-radius:50%;
+  border:3px solid var(--neon-green); box-shadow:var(--glow-green);
+  background:linear-gradient(135deg,var(--neon-green),var(--neon-cyan));
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-head); font-size:2rem; font-weight:900; color:#000; flex-shrink:0; }
+.profile-info h2 { font-family:var(--font-head); font-size:1.4rem; font-weight:900; }
+.profile-info .handle { color:var(--neon-green); font-size:0.9rem; margin-top:2px; }
+.profile-info .bio { color:var(--text-secondary); font-size:0.88rem; margin-top:8px; max-width:400px; }
+.profile-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:24px; }
+@media(max-width:600px){.profile-stats{grid-template-columns:repeat(2,1fr);}}
+.pstat { text-align:center; padding:16px; background:var(--bg-deep); border-radius:var(--radius-sm); border:1px solid var(--border); }
+.pstat-val { font-family:var(--font-head); font-size:1.5rem; font-weight:900; color:var(--neon-green); }
+.pstat-lbl { font-size:0.72rem; color:var(--text-secondary); letter-spacing:1px; margin-top:4px; }
+
+/* ===== ACHIEVEMENTS ===== */
+.achievement { display:flex; align-items:center; gap:14px; padding:14px; 
+  background:var(--bg-deep); border-radius:var(--radius-sm); border:1px solid var(--border); transition:var(--transition); }
+.achievement:hover { border-color:var(--neon-green); }
+.achievement-icon { width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; }
+.achievement h4 { font-size:0.9rem; font-weight:600; }
+.achievement p { font-size:0.78rem; color:var(--text-secondary); margin-top:2px; }
+.ach-gold { background:rgba(255,215,0,0.12); border:1px solid rgba(255,215,0,0.25); }
+.ach-silver { background:rgba(192,192,192,0.1); border:1px solid rgba(192,192,192,0.2); }
+.ach-bronze { background:rgba(205,127,50,0.1); border:1px solid rgba(205,127,50,0.2); }
+.ach-cyan { background:rgba(0,207,255,0.1); border:1px solid rgba(0,207,255,0.2); }
+
+/* ===== CHAT ===== */
+.chat-layout { display:grid; grid-template-columns:240px 1fr; gap:16px; height:calc(100vh - 140px); }
+@media(max-width:768px){.chat-layout{grid-template-columns:1fr;}}
+.chat-sidebar { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column; }
+.chat-sidebar-hdr { padding:16px; border-bottom:1px solid var(--border); font-family:var(--font-head); font-size:0.75rem; letter-spacing:2px; color:var(--text-secondary); }
+.chat-rooms { overflow-y:auto; flex:1; }
+.chat-room-item { padding:12px 16px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.04); transition:var(--transition); display:flex; align-items:center; gap:10px; }
+.chat-room-item:hover, .chat-room-item.active { background:var(--bg-hover); }
+.chat-room-item.active { border-left:3px solid var(--neon-green); }
+.room-icon { font-size:1.1rem; }
+.room-name { font-size:0.88rem; font-weight:500; }
+.room-last { font-size:0.72rem; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.unread-badge { background:var(--neon-green); color:#000; font-family:var(--font-head); font-size:0.6rem; font-weight:700; padding:2px 6px; border-radius:10px; margin-left:auto; }
+.chat-main { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); display:flex; flex-direction:column; overflow:hidden; }
+.chat-hdr { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; }
+.chat-hdr h3 { font-family:var(--font-head); font-size:0.9rem; }
+.chat-hdr p { font-size:0.78rem; color:var(--text-secondary); }
+.live-dot { width:8px; height:8px; border-radius:50%; background:var(--neon-green); animation:pulse 2s infinite; }
+.chat-messages { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
+.msg { display:flex; gap:10px; max-width:80%; }
+.msg.mine { flex-direction:row-reverse; align-self:flex-end; }
+.msg-av { width:34px; height:34px; border-radius:50%; flex-shrink:0; border:1px solid var(--border);
+  background:linear-gradient(135deg,var(--neon-purple),var(--neon-cyan));
+  display:flex; align-items:center; justify-content:center; font-family:var(--font-head); font-size:0.7rem; font-weight:700; color:#fff; }
+.msg-body {}
+.msg-meta { font-size:0.7rem; color:var(--text-muted); margin-bottom:4px; }
+.msg.mine .msg-meta { text-align:right; }
+.msg-text { background:var(--bg-deep); padding:10px 14px; border-radius:12px; font-size:0.88rem; border:1px solid var(--border); }
+.msg.mine .msg-text { background:rgba(0,255,136,0.1); border-color:rgba(0,255,136,0.2); }
+.chat-input-area { padding:12px 16px; border-top:1px solid var(--border); display:flex; gap:10px; }
+.chat-input { flex:1; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 14px; color:var(--text-primary); font-family:var(--font-body); font-size:0.9rem; outline:none; }
+.chat-input:focus { border-color:var(--neon-green); }
+.send-btn { width:42px; height:42px; border-radius:var(--radius-sm); border:none; background:var(--neon-green); color:#000; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:var(--transition); }
+.send-btn:hover { background:#00cc6e; transform:scale(1.05); }
+
+/* ===== PRIZE PODIUM ===== */
+.podium { display:flex; align-items:flex-end; justify-content:center; gap:12px; margin:24px 0; }
+.podium-step { text-align:center; flex:1; max-width:160px; }
+.podium-block { border-radius:8px 8px 0 0; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:16px 8px; }
+.podium-block.first { background:linear-gradient(180deg,rgba(255,215,0,0.2),rgba(255,215,0,0.05)); border:1px solid rgba(255,215,0,0.3); height:120px; }
+.podium-block.second { background:linear-gradient(180deg,rgba(192,192,192,0.15),rgba(192,192,192,0.03)); border:1px solid rgba(192,192,192,0.25); height:90px; }
+.podium-block.third { background:linear-gradient(180deg,rgba(205,127,50,0.15),rgba(205,127,50,0.03)); border:1px solid rgba(205,127,50,0.25); height:70px; }
+.podium-icon { font-size:1.4rem; }
+.podium-pos { font-family:var(--font-head); font-size:0.7rem; letter-spacing:2px; margin-top:6px; }
+.podium-pos.first { color:var(--gold); }
+.podium-pos.second { color:var(--silver); }
+.podium-pos.third { color:var(--bronze); }
+.podium-name { font-size:0.82rem; font-weight:600; margin-top:8px; }
+.podium-prize { font-family:var(--font-head); font-size:0.85rem; color:var(--neon-green); margin-top:4px; }
+
+/* ===== ADMIN ===== */
+.admin-grid { display:grid; grid-template-columns:220px 1fr; min-height:calc(100vh - 60px); }
+@media(max-width:900px){.admin-grid{grid-template-columns:1fr;}}
+.admin-sidebar {
+  background:rgba(8,8,18,0.98); border-right:1px solid var(--border);
+  padding:20px 0; position:sticky; top:60px; height:calc(100vh - 60px); overflow-y:auto;
+}
+.admin-brand { padding:0 20px 20px; border-bottom:1px solid var(--border); margin-bottom:16px; }
+.admin-brand h3 { font-family:var(--font-head); font-size:0.75rem; letter-spacing:2px; color:var(--neon-orange); }
+.admin-nav-section { padding:0 12px; margin-bottom:20px; }
+.admin-nav-label { font-family:var(--font-head); font-size:0.58rem; letter-spacing:2px; color:var(--text-muted); padding:0 8px; margin-bottom:8px; }
+.admin-nav-btn {
+  display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px;
+  border-radius:8px; background:transparent; border:none; color:var(--text-secondary);
+  cursor:pointer; font-family:var(--font-body); font-size:0.9rem; font-weight:500;
+  transition:var(--transition); text-align:left;
+}
+.admin-nav-btn:hover, .admin-nav-btn.active { color:var(--neon-green); background:rgba(0,255,136,0.08); }
+.admin-nav-btn .icon { font-size:1rem; width:20px; text-align:center; }
+.admin-content { padding:24px; overflow-y:auto; }
+.admin-section { display:none; }
+.admin-section.active { display:block; animation:fadeSlide 0.3s ease; }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(4,4,10,0.85); backdrop-filter:blur(8px);
+  z-index:1000; display:none; align-items:center; justify-content:center; padding:20px;
+}
+.modal-overlay.open { display:flex; animation:fadeSlide 0.2s ease; }
+.modal { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); width:100%; max-width:520px; max-height:90vh; overflow-y:auto; box-shadow:0 0 60px rgba(0,255,136,0.1); }
+.modal-hdr { padding:24px 24px 0; display:flex; align-items:center; justify-content:space-between; }
+.modal-hdr h3 { font-family:var(--font-head); font-size:0.95rem; letter-spacing:2px; }
+.modal-close { background:transparent; border:none; color:var(--text-secondary); cursor:pointer; font-size:1.2rem; padding:4px; }
+.modal-close:hover { color:var(--danger); }
+.modal-body { padding:24px; }
+.modal-footer { padding:0 24px 24px; display:flex; gap:10px; justify-content:flex-end; }
+
+/* ===== TOAST ===== */
+#toast-container { position:fixed; bottom:24px; right:24px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
+.toast {
+  background:var(--bg-card2); border-radius:var(--radius-sm); padding:12px 20px;
+  border-left:3px solid var(--neon-green); box-shadow:var(--glow-green);
+  font-size:0.88rem; min-width:220px; max-width:320px; animation:slideIn 0.3s ease;
+}
+@keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+.toast.error { border-color:var(--danger); box-shadow:0 0 20px rgba(255,51,85,0.2); }
+.toast.warn { border-color:var(--warning); }
+.toast-title { font-weight:600; margin-bottom:2px; }
+.toast-msg { color:var(--text-secondary); font-size:0.82rem; }
+
+/* ===== TABS ===== */
+.tabs { display:flex; gap:4px; background:var(--bg-deep); border-radius:8px; padding:4px; margin-bottom:20px; flex-wrap:wrap; }
+.tab-btn {
+  padding:8px 16px; border-radius:6px; background:transparent; border:none;
+  color:var(--text-secondary); cursor:pointer; font-family:var(--font-head); font-size:0.65rem; letter-spacing:1.5px;
+  transition:var(--transition); white-space:nowrap;
+}
+.tab-btn.active { background:rgba(0,255,136,0.12); color:var(--neon-green); }
+.tab-content { display:none; }
+.tab-content.active { display:block; animation:fadeSlide 0.2s ease; }
+
+/* ===== RANK BADGE ===== */
+.rank-badge { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:20px; font-family:var(--font-head); font-size:0.65rem; font-weight:700; letter-spacing:1px; }
+.rank-legend { background:rgba(255,215,0,0.15); color:var(--gold); border:1px solid rgba(255,215,0,0.3); }
+.rank-gold { background:rgba(255,180,0,0.12); color:#ffb700; border:1px solid rgba(255,180,0,0.25); }
+.rank-silver { background:rgba(192,192,192,0.1); color:var(--silver); border:1px solid rgba(192,192,192,0.2); }
+.rank-bronze { background:rgba(205,127,50,0.1); color:var(--bronze); border:1px solid rgba(205,127,50,0.2); }
+
+/* ===== SEARCH / FILTER ===== */
+.search-bar { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+.search-input { flex:1; min-width:200px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 14px; color:var(--text-primary); font-family:var(--font-body); font-size:0.9rem; outline:none; }
+.search-input:focus { border-color:var(--neon-green); }
+
+/* ===== ANNOUNCEMENT ===== */
+.announce-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; border-left:3px solid var(--neon-green); transition:var(--transition); }
+.announce-card:hover { border-color:rgba(0,255,136,0.3); }
+.announce-card h4 { font-family:var(--font-head); font-size:0.88rem; margin-bottom:8px; }
+.announce-card p { font-size:0.85rem; color:var(--text-secondary); }
+.announce-meta { font-size:0.72rem; color:var(--text-muted); margin-top:10px; display:flex; gap:12px; }
+
+/* ===== NOTIF PANEL ===== */
+.notif-panel { position:fixed; top:60px; right:16px; width:320px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); z-index:500; box-shadow:var(--glow-green); display:none; max-height:400px; overflow:hidden; flex-direction:column; }
+.notif-panel.open { display:flex; animation:fadeSlide 0.2s ease; }
+.notif-panel-hdr { padding:14px 16px; border-bottom:1px solid var(--border); font-family:var(--font-head); font-size:0.72rem; letter-spacing:2px; display:flex; justify-content:space-between; align-items:center; }
+.notif-list { overflow-y:auto; flex:1; }
+.notif-item { padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.04); display:flex; gap:10px; }
+.notif-icon { font-size:1rem; }
+.notif-text { font-size:0.82rem; }
+.notif-time { font-size:0.7rem; color:var(--text-muted); margin-top:2px; }
+
+/* ===== ANALYTICS ===== */
+.chart-bar-wrap { display:flex; align-items:flex-end; gap:8px; height:120px; margin-top:12px; }
+.chart-bar { flex:1; background:rgba(0,255,136,0.08); border-radius:4px 4px 0 0; border:1px solid rgba(0,255,136,0.15); transition:height 0.5s ease; position:relative; cursor:pointer; min-width:20px; }
+.chart-bar:hover { background:rgba(0,255,136,0.15); }
+.chart-bar-label { font-size:0.65rem; color:var(--text-muted); text-align:center; margin-top:4px; }
+.chart-bar-val { position:absolute; top:-20px; left:50%; transform:translateX(-50%); font-size:0.65rem; color:var(--neon-green); font-family:var(--font-mono); white-space:nowrap; }
+
+/* ===== LANDING HERO ===== */
+.landing-hero {
+  padding:60px 24px; text-align:center; position:relative; overflow:hidden;
+}
+.landing-hero::before {
+  content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:600px; height:600px;
+  background:radial-gradient(circle,rgba(0,255,136,0.06) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-eyebrow { font-family:var(--font-head); font-size:0.65rem; letter-spacing:4px; color:var(--neon-green); margin-bottom:16px; }
+.hero-title { font-family:var(--font-head); font-size:clamp(1.8rem,5vw,3.2rem); font-weight:900; line-height:1.1; margin-bottom:16px;
+  background:linear-gradient(135deg,var(--text-primary) 30%,var(--neon-green));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.hero-sub { color:var(--text-secondary); max-width:480px; margin:0 auto 32px; font-size:1rem; }
+.hero-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+
+/* ===== PAYMENT METHODS ===== */
+.payment-methods { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-top:16px; }
+.pay-method { background:var(--bg-deep); border:2px solid var(--border); border-radius:var(--radius-sm); padding:16px; text-align:center; cursor:pointer; transition:var(--transition); }
+.pay-method:hover, .pay-method.selected { border-color:var(--neon-green); background:rgba(0,255,136,0.05); }
+.pay-method .icon { font-size:1.6rem; margin-bottom:6px; }
+.pay-method .name { font-size:0.8rem; font-weight:600; }
+.pay-method .desc { font-size:0.7rem; color:var(--text-secondary); }
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+  .topbar-nav { display:none; }
+  .section { padding:16px; }
+  .fixture-card { grid-template-columns:1fr; text-align:center; }
+  .chat-layout { grid-template-columns:1fr; height:auto; }
+  .admin-grid { grid-template-columns:1fr; }
+  .admin-sidebar { position:relative; top:0; height:auto; }
+}
+
+/* ===== MISC UTILS ===== */
+.flex { display:flex; }
+.flex-col { flex-direction:column; }
+.items-center { align-items:center; }
+.justify-between { justify-content:space-between; }
+.gap-8 { gap:8px; }
+.gap-12 { gap:12px; }
+.gap-16 { gap:16px; }
+.gap-20 { gap:20px; }
+.mt-8 { margin-top:8px; }
+.mt-12 { margin-top:12px; }
+.mt-16 { margin-top:16px; }
+.mt-20 { margin-top:20px; }
+.mt-24 { margin-top:24px; }
+.mb-16 { margin-bottom:16px; }
+.mb-20 { margin-bottom:20px; }
+.mb-24 { margin-bottom:24px; }
+.text-green { color:var(--neon-green); }
+.text-cyan { color:var(--neon-cyan); }
+.text-gold { color:var(--gold); }
+.text-muted { color:var(--text-muted); }
+.text-secondary { color:var(--text-secondary); }
+.text-danger { color:var(--danger); }
+.text-warning { color:var(--warning); }
+.font-head { font-family:var(--font-head); }
+.font-mono { font-family:var(--font-mono); }
+.text-sm { font-size:0.82rem; }
+.text-xs { font-size:0.72rem; }
+.truncate { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.divider { height:1px; background:var(--border); margin:16px 0; }
+.empty-state { text-align:center; padding:48px; color:var(--text-secondary); }
+.empty-state .icon { font-size:3rem; margin-bottom:12px; }
+.empty-state h3 { font-family:var(--font-head); font-size:0.9rem; margin-bottom:8px; color:var(--text-primary); }
+.dot-online { display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--neon-green); }
+.dot-offline { display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--text-muted); }
+input[type="range"] { -webkit-appearance:none; width:100%; height:4px; background:var(--bg-deep); border-radius:2px; outline:none; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--neon-green); cursor:pointer; }
+
+/* ===== MOBILE NAV ===== */
+.mobile-nav { display:none; position:fixed; bottom:0; left:0; right:0; background:rgba(8,8,18,0.98); border-top:1px solid var(--border); z-index:100; padding:8px 4px; backdrop-filter:blur(20px); }
+.mobile-nav-inner { display:flex; justify-content:space-around; max-width:500px; margin:0 auto; }
+.mobile-nav-btn { display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 12px; border-radius:8px; background:transparent; border:none; color:var(--text-secondary); cursor:pointer; transition:var(--transition); font-family:var(--font-head); font-size:0.55rem; letter-spacing:1px; }
+.mobile-nav-btn.active, .mobile-nav-btn:hover { color:var(--neon-green); }
+.mobile-nav-btn .icon { font-size:1.2rem; }
+@media(max-width:768px){ .mobile-nav{display:block;} .main-content{padding-bottom:70px;} }
+</style>
+</head>
+<body>
+
+<!-- ===== AUTH PAGE ===== -->
+<div id="page-auth" class="page">
+  <div class="auth-wrap">
+    <div class="auth-logo">
+      <div class="brand">NEXALEAGUE</div>
+      <p>⚡ COMPETITIVE EFOOTBALL PLATFORM</p>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchAuthTab('login')">LOGIN</div>
+        <div class="auth-tab" onclick="switchAuthTab('register')">REGISTER</div>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <div class="auth-form active" id="form-login">
+        <div class="form-group">
+          <label>EMAIL ADDRESS</label>
+          <input type="email" id="login-email" placeholder="player@nexaleague.gg" value="player@nexaleague.gg">
+        </div>
+        <div class="form-group">
+          <label>PASSWORD</label>
+          <input type="password" id="login-pass" placeholder="••••••••" value="password">
+        </div>
+        <div style="text-align:right;margin-bottom:16px">
+          <a href="#" style="color:var(--neon-green);font-size:0.78rem;text-decoration:none" onclick="showToast('Reset link sent to your email!','success')">Forgot password?</a>
+        </div>
+        <button class="btn btn-primary" onclick="doLogin()">⚡ LOGIN</button>
+        <div style="margin-top:12px;text-align:center">
+          <span style="font-size:0.78rem;color:var(--text-secondary)">Demo Admin: </span>
+          <a href="#" style="color:var(--neon-orange);font-size:0.78rem;text-decoration:none" onclick="doAdminLogin()">Login as Admin</a>
+        </div>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div class="auth-form" id="form-register">
+        <div class="form-group">
+          <label>USERNAME</label>
+          <input type="text" id="reg-username" placeholder="ProStriker99">
+        </div>
+        <div class="form-group">
+          <label>EMAIL ADDRESS</label>
+          <input type="email" id="reg-email" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label>PASSWORD</label>
+          <input type="password" id="reg-pass" placeholder="Min 8 characters">
+        </div>
+        <div class="form-group">
+          <label>CONFIRM PASSWORD</label>
+          <input type="password" id="reg-pass2" placeholder="Repeat password">
+        </div>
+        <button class="btn btn-primary" onclick="doRegister()">🎮 CREATE ACCOUNT</button>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:16px;font-size:0.75rem;color:var(--text-muted)">No ads. No distractions. Just football.</p>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-brand" onclick="showSection('dashboard')">NEXALEAGUE</div>
+    <div class="topbar-nav" id="player-nav">
+      <button class="nav-btn active" onclick="showSection('dashboard')">⚡ DASHBOARD</button>
+      <button class="nav-btn" onclick="showSection('leagues')">🏆 LEAGUES</button>
+      <button class="nav-btn" onclick="showSection('fixtures')">⚽ FIXTURES</button>
+      <button class="nav-btn" onclick="showSection('standings')">📊 STANDINGS</button>
+      <button class="nav-btn" onclick="showSection('community')">💬 COMMUNITY</button>
+      <button class="nav-btn" onclick="showSection('prizes')">🥇 PRIZES</button>
+    </div>
+    <div class="topbar-nav" id="admin-nav" style="display:none">
+      <button class="nav-btn active" onclick="showAdminSection('admin-overview')">📊 OVERVIEW</button>
+      <button class="nav-btn" onclick="showAdminSection('admin-users')">👥 USERS</button>
+      <button class="nav-btn" onclick="showAdminSection('admin-leagues')">🏆 LEAGUES</button>
+      <button class="nav-btn" onclick="showAdminSection('admin-matches')">⚽ MATCHES</button>
+      <button class="nav-btn" onclick="showAdminSection('admin-payments')">💳 PAYMENTS</button>
+      <button class="nav-btn" onclick="showAdminSection('admin-announce')">📢 ANNOUNCE</button>
+    </div>
+    <div class="topbar-right">
+      <button class="notif-btn" onclick="toggleNotif()">
+        🔔 <span class="notif-dot"></span>
+      </button>
+      <div class="avatar-placeholder" id="user-avatar" onclick="showSection('profile')">P</div>
+      <button class="btn btn-ghost btn-sm" onclick="switchRole()" id="role-switch-btn" title="Switch view">⚙️</button>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">EXIT</button>
+    </div>
+  </div>
+
+  <!-- NOTIFICATION PANEL -->
+  <div class="notif-panel" id="notif-panel">
+    <div class="notif-panel-hdr">
+      <span>NOTIFICATIONS</span>
+      <button onclick="toggleNotif()" style="background:none;border:none;color:var(--text-muted);cursor:pointer">✕</button>
+    </div>
+    <div class="notif-list">
+      <div class="notif-item"><div class="notif-icon">⚽</div><div><div class="notif-text">Match result submitted: <b>You won 3-1</b></div><div class="notif-time">5 mins ago</div></div></div>
+      <div class="notif-item"><div class="notif-icon">🏆</div><div><div class="notif-text">New league available: <b>Premier Elite Cup</b></div><div class="notif-time">1 hour ago</div></div></div>
+      <div class="notif-item"><div class="notif-icon">💬</div><div><div class="notif-text">New message in <b>Global Chat</b></div><div class="notif-time">2 hours ago</div></div></div>
+      <div class="notif-item"><div class="notif-icon">🥇</div><div><div class="notif-text">Season 4 winners announced!</div><div class="notif-time">Yesterday</div></div></div>
+      <div class="notif-item"><div class="notif-icon">💳</div><div><div class="notif-text">Premium subscription activated</div><div class="notif-time">3 days ago</div></div></div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <!-- ===== PLAYER SECTIONS ===== -->
+
+    <!-- DASHBOARD -->
+    <div class="section active" id="section-dashboard">
+      <div class="landing-hero" style="padding:40px 0 32px">
+        <div class="hero-eyebrow">WELCOME BACK</div>
+        <div class="hero-title" id="welcome-title">READY TO DOMINATE, PLAYER?</div>
+        <p class="hero-sub">Season 5 is live. Your next match is waiting.</p>
+      </div>
+
+      <div class="stats-grid" id="player-stats-grid">
+        <div class="stat-card"><div class="stat-icon">⚽</div><div class="stat-value">47</div><div class="stat-label">MATCHES PLAYED</div><div class="stat-change">↑ +3 this week</div></div>
+        <div class="stat-card" style="--neon-green:var(--neon-cyan)"><div class="stat-icon">✅</div><div class="stat-value text-cyan">31</div><div class="stat-label">WINS</div><div class="stat-change" style="color:var(--neon-cyan)">↑ +2 this week</div></div>
+        <div class="stat-card" style="--neon-green:var(--gold)"><div class="stat-icon">🥅</div><div class="stat-value text-gold">128</div><div class="stat-label">GOALS SCORED</div><div class="stat-change" style="color:var(--gold)">↑ +11 this week</div></div>
+        <div class="stat-card" style="--neon-green:var(--neon-purple)"><div class="stat-icon">🏆</div><div class="stat-value" style="color:var(--neon-purple)">12</div><div class="stat-label">LEAGUE RANK</div><div class="stat-change" style="color:var(--neon-purple)">↑ +4 positions</div></div>
+      </div>
+
+      <div class="grid-2">
+        <!-- RECENT MATCHES -->
+        <div class="card">
+          <div class="panel-hdr"><h2>RECENT MATCHES</h2><button class="btn btn-ghost btn-sm" onclick="showSection('fixtures')">VIEW ALL</button></div>
+          <div style="display:flex;flex-direction:column;gap:10px" id="recent-matches-list">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+        <!-- UPCOMING -->
+        <div class="card">
+          <div class="panel-hdr"><h2>UPCOMING FIXTURES</h2><button class="btn btn-ghost btn-sm" onclick="showSection('fixtures')">VIEW ALL</button></div>
+          <div style="display:flex;flex-direction:column;gap:10px" id="upcoming-list">
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-20 grid-2">
+        <!-- MY LEAGUES -->
+        <div class="card">
+          <div class="panel-hdr"><h2>ACTIVE LEAGUES</h2><button class="btn btn-ghost btn-sm" onclick="showSection('leagues')">BROWSE</button></div>
+          <div id="my-leagues-mini"></div>
+        </div>
+
+        <!-- ANNOUNCEMENTS -->
+        <div class="card">
+          <div class="panel-hdr"><h2>ANNOUNCEMENTS</h2></div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div class="announce-card"><h4>🏆 Season 5 Grand Final</h4><p>The grand finale kicks off December 28. Top 8 players advance automatically.</p><div class="announce-meta"><span>📅 Dec 24, 2025</span><span class="badge-ongoing badge" style="padding:2px 8px">OFFICIAL</span></div></div>
+            <div class="announce-card" style="border-left-color:var(--neon-cyan)"><h4>🎁 Holiday Special Tournament</h4><p>Free entry festive cup with KES 50,000 prize pool. Register now!</p><div class="announce-meta"><span>📅 Dec 20, 2025</span></div></div>
+            <div class="announce-card" style="border-left-color:var(--neon-purple)"><h4>⚡ System Maintenance</h4><p>Brief downtime on Dec 26 from 2AM - 4AM EAT. Plan accordingly.</p><div class="announce-meta"><span>📅 Dec 19, 2025</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEAGUES -->
+    <div class="section" id="section-leagues">
+      <div class="panel-hdr">
+        <div><h2>LEAGUES</h2><p>Join competitive leagues and prove your skill</p></div>
+        <button class="btn btn-primary" onclick="openModal('join-league-modal')">+ JOIN LEAGUE</button>
+      </div>
+
+      <div class="tabs" id="league-tabs">
+        <button class="tab-btn active" onclick="filterLeagues('all',this)">ALL LEAGUES</button>
+        <button class="tab-btn" onclick="filterLeagues('free',this)">FREE</button>
+        <button class="tab-btn" onclick="filterLeagues('premium',this)">PREMIUM</button>
+        <button class="tab-btn" onclick="filterLeagues('ongoing',this)">ONGOING</button>
+        <button class="tab-btn" onclick="filterLeagues('upcoming',this)">UPCOMING</button>
+        <button class="tab-btn" onclick="filterLeagues('completed',this)">COMPLETED</button>
+      </div>
+
+      <div class="grid-3" id="leagues-grid">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- LEAGUE DETAIL (hidden sub-view) -->
+    <div class="section" id="section-league-detail">
+      <button class="btn btn-ghost btn-sm mb-16" onclick="showSection('leagues')">← BACK TO LEAGUES</button>
+      <div id="league-detail-content"></div>
+    </div>
+
+    <!-- FIXTURES -->
+    <div class="section" id="section-fixtures">
+      <div class="panel-hdr">
+        <div><h2>FIXTURES & RESULTS</h2><p>Track your matches and submit results</p></div>
+        <div class="flex gap-8">
+          <button class="btn btn-ghost btn-sm" onclick="filterFixtures('all',this)">ALL</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterFixtures('live',this)">🔴 LIVE</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterFixtures('scheduled',this)">UPCOMING</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterFixtures('done',this)">RESULTS</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px" id="fixtures-list">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- STANDINGS -->
+    <div class="section" id="section-standings">
+      <div class="panel-hdr">
+        <div><h2>LEAGUE STANDINGS</h2><p>Real-time table updated after each match</p></div>
+        <div class="flex gap-8 items-center">
+          <select id="standings-league-select" class="search-input" style="max-width:220px;margin:0" onchange="renderStandings()">
+            <option value="0">Premier Elite Cup</option>
+            <option value="1">Champions Division</option>
+            <option value="2">Weekend Warriors</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="standings-table">
+          <thead>
+            <tr>
+              <th>#</th><th>PLAYER</th><th>MP</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>PTS</th><th>FORM</th>
+            </tr>
+          </thead>
+          <tbody id="standings-body"></tbody>
+        </table>
+      </div>
+      <div class="mt-16 flex gap-12" style="font-size:0.75rem;color:var(--text-secondary);flex-wrap:wrap">
+        <span><span class="pos-indicator pos-up"></span>Promotion zone</span>
+        <span><span class="pos-indicator pos-down" style="display:inline-block"></span>Relegation zone</span>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="section" id="section-profile">
+      <div class="profile-hero">
+        <div class="profile-top">
+          <div class="profile-avatar" id="profile-avatar-display">P</div>
+          <div class="profile-info">
+            <h2 id="profile-username">ProStriker99</h2>
+            <div class="handle" id="profile-handle">@prostriker99</div>
+            <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+              <span class="rank-badge rank-gold">🥇 GOLD RANK</span>
+              <span class="badge badge-player">PLAYER</span>
+            </div>
+            <div class="bio" style="margin-top:10px">Elite eFootball competitor from Nairobi. Specializing in counter-attack tactics. 3x league champion.</div>
+          </div>
+          <div style="margin-left:auto">
+            <button class="btn btn-secondary btn-sm" onclick="openModal('edit-profile-modal')">✏️ EDIT PROFILE</button>
+          </div>
+        </div>
+        <div class="profile-stats">
+          <div class="pstat"><div class="pstat-val">47</div><div class="pstat-lbl">MATCHES</div></div>
+          <div class="pstat"><div class="pstat-val">31</div><div class="pstat-lbl">WINS</div></div>
+          <div class="pstat"><div class="pstat-val">128</div><div class="pstat-lbl">GOALS</div></div>
+          <div class="pstat"><div class="pstat-val" style="color:var(--gold)">3</div><div class="pstat-lbl">TITLES</div></div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('profile-tabs','profile-history',this)">MATCH HISTORY</button>
+        <button class="tab-btn" onclick="switchTab('profile-tabs','profile-achievements',this)">ACHIEVEMENTS</button>
+        <button class="tab-btn" onclick="switchTab('profile-tabs','profile-subscription',this)">SUBSCRIPTION</button>
+      </div>
+
+      <div class="tab-content active" id="profile-history">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>DATE</th><th>LEAGUE</th><th>OPPONENT</th><th>SCORE</th><th>RESULT</th></tr></thead>
+            <tbody id="history-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-content" id="profile-achievements">
+        <div class="grid-2">
+          <div class="achievement"><div class="achievement-icon ach-gold">🏆</div><div><h4>League Champion</h4><p>Won Season 3 Premier Elite Cup</p></div></div>
+          <div class="achievement"><div class="achievement-icon ach-cyan">⚡</div><div><h4>Hat-Trick Hero</h4><p>Scored 3 goals in a single match</p></div></div>
+          <div class="achievement"><div class="achievement-icon ach-gold">🎯</div><div><h4>Sharpshooter</h4><p>Top scorer with 45+ goals in a season</p></div></div>
+          <div class="achievement"><div class="achievement-icon ach-silver">🛡️</div><div><h4>Iron Defense</h4><p>Kept 10 clean sheets in a row</p></div></div>
+          <div class="achievement"><div class="achievement-icon ach-bronze">🔥</div><div><h4>Win Streak</h4><p>Won 8 matches consecutively</p></div></div>
+          <div class="achievement"><div class="achievement-icon ach-cyan">⭐</div><div><h4>Elite Member</h4><p>Premium subscriber for 6 months</p></div></div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="profile-subscription">
+        <div class="card" style="max-width:480px">
+          <h3 class="font-head text-green" style="font-size:0.9rem;letter-spacing:2px;margin-bottom:16px">CURRENT PLAN</h3>
+          <div style="background:linear-gradient(135deg,rgba(0,255,136,0.08),rgba(0,207,255,0.04));border:1px solid var(--neon-green);border-radius:var(--radius-sm);padding:20px;margin-bottom:16px">
+            <div style="font-family:var(--font-head);font-size:1.2rem;color:var(--neon-green)">⚡ PREMIUM MONTHLY</div>
+            <div style="color:var(--text-secondary);margin-top:6px;font-size:0.85rem">Active until January 15, 2026</div>
+            <div style="font-family:var(--font-head);font-size:1.6rem;margin-top:10px">KES 999<span style="font-size:0.8rem;color:var(--text-secondary)">/mo</span></div>
+          </div>
+          <div style="margin-bottom:16px">
+            <div class="flex items-center gap-8 mt-8"><span style="color:var(--neon-green)">✓</span><span style="font-size:0.88rem">Access to all premium leagues</span></div>
+            <div class="flex items-center gap-8 mt-8"><span style="color:var(--neon-green)">✓</span><span style="font-size:0.88rem">Priority match scheduling</span></div>
+            <div class="flex items-center gap-8 mt-8"><span style="color:var(--neon-green)">✓</span><span style="font-size:0.88rem">Advanced statistics</span></div>
+            <div class="flex items-center gap-8 mt-8"><span style="color:var(--neon-green)">✓</span><span style="font-size:0.88rem">Exclusive chat rooms</span></div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="openModal('payment-modal')">RENEW SUBSCRIPTION</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMMUNITY / CHAT -->
+    <div class="section" id="section-community">
+      <div class="panel-hdr"><h2>COMMUNITY</h2><p>Chat with players and league members</p></div>
+      <div class="chat-layout">
+        <div class="chat-sidebar">
+          <div class="chat-sidebar-hdr">CHAT ROOMS</div>
+          <div class="chat-rooms">
+            <div class="chat-room-item active" onclick="switchChatRoom(this,'🌍 Global Chat','All players online')">
+              <div class="room-icon">🌍</div>
+              <div><div class="room-name">Global Chat</div><div class="room-last">GhostPlayer: gg wp!</div></div>
+              <div class="unread-badge">3</div>
+            </div>
+            <div class="chat-room-item" onclick="switchChatRoom(this,'🏆 Premier Elite Cup','League members only')">
+              <div class="room-icon">🏆</div>
+              <div><div class="room-name">Premier Elite Cup</div><div class="room-last">NightOwl: finals are close</div></div>
+            </div>
+            <div class="chat-room-item" onclick="switchChatRoom(this,'⚡ Champions Division','Champions talk')">
+              <div class="room-icon">⚡</div>
+              <div><div class="room-name">Champions Division</div><div class="room-last">StarPlayer: who's ready?</div></div>
+              <div class="unread-badge">1</div>
+            </div>
+            <div class="chat-room-item" onclick="switchChatRoom(this,'🎮 Weekend Warriors','Casual league chat')">
+              <div class="room-icon">🎮</div>
+              <div><div class="room-name">Weekend Warriors</div><div class="room-last">Blazer: see you Saturday</div></div>
+            </div>
+            <div style="padding:12px 16px;font-family:var(--font-head);font-size:0.62rem;letter-spacing:2px;color:var(--text-muted)">DIRECT MESSAGES</div>
+            <div class="chat-room-item" onclick="switchChatRoom(this,'💬 GhostPlayer','Private message')">
+              <div class="room-icon">👤</div>
+              <div><div class="room-name">GhostPlayer</div><div class="room-last">Let's play Friday?</div></div>
+            </div>
+            <div class="chat-room-item" onclick="switchChatRoom(this,'💬 NightOwl_KE','Private message')">
+              <div class="room-icon">👤</div>
+              <div><div class="room-name">NightOwl_KE</div><div class="room-last">gg last match</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-main">
+          <div class="chat-hdr">
+            <div class="live-dot"></div>
+            <div>
+              <h3 id="chat-room-name">🌍 Global Chat</h3>
+              <p id="chat-room-desc">All players online • 142 members</p>
+            </div>
+          </div>
+          <div class="chat-messages" id="chat-messages">
+            <!-- populated by JS -->
+          </div>
+          <div class="chat-input-area">
+            <input type="text" class="chat-input" id="chat-input" placeholder="Send a message..." onkeydown="if(event.key==='Enter')sendChatMsg()">
+            <button class="send-btn" onclick="sendChatMsg()">➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRIZES -->
+    <div class="section" id="section-prizes">
+      <div class="panel-hdr"><h2>PRIZE CENTRE</h2><p>League rewards and winner history</p></div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('prize-tabs','prize-current',this)">CURRENT PRIZES</button>
+        <button class="tab-btn" onclick="switchTab('prize-tabs','prize-history',this)">WINNER HISTORY</button>
+      </div>
+
+      <div class="tab-content active" id="prize-current">
+        <div class="grid-3" id="prize-pools-grid">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <div class="tab-content" id="prize-history">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>SEASON</th><th>LEAGUE</th><th>🥇 WINNER</th><th>🥈 2ND</th><th>🥉 3RD</th><th>PRIZE POOL</th><th>DATE</th></tr></thead>
+            <tbody>
+              <tr><td><span class="font-head text-green">S4</span></td><td>Premier Elite Cup</td><td><b>ProStriker99</b></td><td>NightOwl_KE</td><td>GhostPlayer</td><td class="text-gold font-head">KES 150,000</td><td class="text-secondary">Nov 2025</td></tr>
+              <tr><td><span class="font-head text-green">S3</span></td><td>Champions Division</td><td><b>StarPlayer_TZ</b></td><td>BlazeMaster</td><td>QuickFeet99</td><td class="text-gold font-head">KES 80,000</td><td class="text-secondary">Aug 2025</td></tr>
+              <tr><td><span class="font-head text-green">S3</span></td><td>Weekend Warriors</td><td><b>CasualKing</b></td><td>WeekendFighter</td><td>LegendaryFoot</td><td class="text-gold font-head">KES 30,000</td><td class="text-secondary">Aug 2025</td></tr>
+              <tr><td><span class="font-head text-green">S2</span></td><td>Premier Elite Cup</td><td><b>NightOwl_KE</b></td><td>GhostPlayer</td><td>ProStriker99</td><td class="text-gold font-head">KES 120,000</td><td class="text-secondary">May 2025</td></tr>
+              <tr><td><span class="font-head text-green">S1</span></td><td>Premier Elite Cup</td><td><b>OriginalChamp</b></td><td>EarlyBird</td><td>FirstKick</td><td class="text-gold font-head">KES 100,000</td><td class="text-secondary">Feb 2025</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ADMIN SECTIONS ===== -->
+    <div class="section" id="section-admin">
+      <div class="admin-grid">
+        <!-- ADMIN SIDEBAR -->
+        <div class="admin-sidebar">
+          <div class="admin-brand">
+            <div style="font-family:var(--font-head);font-size:1rem;font-weight:900;color:var(--neon-green)">NEXALEAGUE</div>
+            <h3>ADMIN CONSOLE</h3>
+          </div>
+          <div class="admin-nav-section">
+            <div class="admin-nav-label">OVERVIEW</div>
+            <button class="admin-nav-btn active" onclick="showAdminSection('admin-overview',this)"><span class="icon">📊</span>Analytics</button>
+          </div>
+          <div class="admin-nav-section">
+            <div class="admin-nav-label">MANAGEMENT</div>
+            <button class="admin-nav-btn" onclick="showAdminSection('admin-users',this)"><span class="icon">👥</span>Users</button>
+            <button class="admin-nav-btn" onclick="showAdminSection('admin-leagues',this)"><span class="icon">🏆</span>Leagues</button>
+            <button class="admin-nav-btn" onclick="showAdminSection('admin-matches',this)"><span class="icon">⚽</span>Match Control</button>
+            <button class="admin-nav-btn" onclick="showAdminSection('admin-prizes',this)"><span class="icon">🥇</span>Prize Management</button>
+          </div>
+          <div class="admin-nav-section">
+            <div class="admin-nav-label">FINANCE</div>
+            <button class="admin-nav-btn" onclick="showAdminSection('admin-payments',this)"><span class="icon">💳</span>Payments</button>
+            <button class="admin-nav-btn" onclick="showAdminSection('admin-subscriptions',this)"><span class="icon">⭐</span>Subscriptions</button>
+          </div>
+          <div class="admin-nav-section">
+            <div class="admin-nav-label">COMMUNICATIONS</div>
+            <button class="admin-nav-btn" onclick="showAdminSection('admin-announce',this)"><span class="icon">📢</span>Announcements</button>
+          </div>
+          <div style="padding:16px 20px;margin-top:auto">
+            <button class="btn btn-ghost btn-sm" onclick="switchRole()" style="width:100%;justify-content:center">← PLAYER VIEW</button>
+          </div>
+        </div>
+
+        <!-- ADMIN CONTENT -->
+        <div class="admin-content">
+
+          <!-- OVERVIEW -->
+          <div class="admin-section active" id="admin-overview">
+            <div class="panel-hdr"><h2>ANALYTICS OVERVIEW</h2><p>Live platform statistics</p></div>
+            <div class="stats-grid">
+              <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value">1,247</div><div class="stat-label">TOTAL PLAYERS</div><div class="stat-change">↑ +23 this week</div></div>
+              <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-value text-cyan" style="--neon-green:var(--neon-cyan)">8</div><div class="stat-label">ACTIVE LEAGUES</div></div>
+              <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-value text-gold" style="--neon-green:var(--gold)">847K</div><div class="stat-label">REVENUE (KES)</div><div class="stat-change" style="color:var(--gold)">↑ +15%</div></div>
+              <div class="stat-card"><div class="stat-icon">⚽</div><div class="stat-value" style="color:var(--neon-purple);--neon-green:var(--neon-purple)">312</div><div class="stat-label">MATCHES TODAY</div></div>
+            </div>
+
+            <div class="grid-2 mt-20">
+              <div class="card">
+                <div class="panel-hdr"><h2>REVENUE (6 MONTHS)</h2></div>
+                <div class="chart-bar-wrap" id="revenue-chart"></div>
+                <div style="display:flex;gap:12px;margin-top:8px" id="revenue-chart-labels"></div>
+              </div>
+              <div class="card">
+                <div class="panel-hdr"><h2>PLAYER ACTIVITY</h2></div>
+                <div class="chart-bar-wrap" id="activity-chart"></div>
+                <div style="display:flex;gap:12px;margin-top:8px" id="activity-chart-labels"></div>
+              </div>
+            </div>
+
+            <div class="card mt-20">
+              <div class="panel-hdr"><h2>RECENT TRANSACTIONS</h2></div>
+              <div class="table-wrap" style="border:none">
+                <table class="data-table">
+                  <thead><tr><th>PLAYER</th><th>TYPE</th><th>AMOUNT</th><th>METHOD</th><th>STATUS</th><th>DATE</th></tr></thead>
+                  <tbody>
+                    <tr><td>ProStriker99</td><td>Premium Monthly</td><td class="text-green font-head">KES 999</td><td>M-Pesa</td><td><span class="badge badge-free">CONFIRMED</span></td><td class="text-secondary">Dec 24</td></tr>
+                    <tr><td>NightOwl_KE</td><td>League Entry</td><td class="text-green font-head">KES 500</td><td>Stripe</td><td><span class="badge badge-free">CONFIRMED</span></td><td class="text-secondary">Dec 24</td></tr>
+                    <tr><td>GhostPlayer</td><td>Premium Monthly</td><td class="text-green font-head">KES 999</td><td>M-Pesa</td><td><span class="badge badge-upcoming">PENDING</span></td><td class="text-secondary">Dec 23</td></tr>
+                    <tr><td>StarPlayer_TZ</td><td>League Entry</td><td class="text-green font-head">KES 1,000</td><td>PayPal</td><td><span class="badge badge-free">CONFIRMED</span></td><td class="text-secondary">Dec 23</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- USERS -->
+          <div class="admin-section" id="admin-users">
+            <div class="panel-hdr"><h2>USER MANAGEMENT</h2><p>Manage all registered players</p></div>
+            <div class="search-bar">
+              <input type="text" class="search-input" placeholder="🔍 Search players..." oninput="filterUsers(this.value)" id="user-search">
+              <select class="search-input" style="max-width:160px" onchange="filterUserRole(this.value)">
+                <option value="">All Roles</option>
+                <option value="player">Players</option>
+                <option value="admin">Admins</option>
+              </select>
+              <button class="btn btn-primary btn-sm" onclick="openModal('add-user-modal')">+ ADD USER</button>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>PLAYER</th><th>EMAIL</th><th>ROLE</th><th>STATUS</th><th>LEAGUES</th><th>JOINED</th><th>ACTIONS</th></tr></thead>
+                <tbody id="users-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- LEAGUES ADMIN -->
+          <div class="admin-section" id="admin-leagues">
+            <div class="panel-hdr"><h2>LEAGUE MANAGEMENT</h2><p>Create and manage all leagues</p></div>
+            <button class="btn btn-primary mb-20" onclick="openModal('create-league-modal')">+ CREATE LEAGUE</button>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>LEAGUE</th><th>TYPE</th><th>PLAYERS</th><th>PRIZE POOL</th><th>STATUS</th><th>ACTIONS</th></tr></thead>
+                <tbody id="admin-leagues-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- MATCHES ADMIN -->
+          <div class="admin-section" id="admin-matches">
+            <div class="panel-hdr"><h2>MATCH CONTROL</h2><p>Input results, approve reports</p></div>
+            <div class="tabs" style="margin-bottom:20px">
+              <button class="tab-btn active" onclick="switchTab('admin-match-tabs','admin-pending-matches',this)">PENDING RESULTS</button>
+              <button class="tab-btn" onclick="switchTab('admin-match-tabs','admin-all-matches',this)">ALL MATCHES</button>
+            </div>
+            <div class="tab-content active" id="admin-pending-matches">
+              <div style="display:flex;flex-direction:column;gap:12px" id="pending-matches-list">
+                <!-- populated by JS -->
+              </div>
+            </div>
+            <div class="tab-content" id="admin-all-matches">
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead><tr><th>MATCH</th><th>LEAGUE</th><th>SCORE</th><th>DATE</th><th>STATUS</th><th>ACTIONS</th></tr></thead>
+                  <tbody id="all-matches-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- PRIZES ADMIN -->
+          <div class="admin-section" id="admin-prizes">
+            <div class="panel-hdr"><h2>PRIZE MANAGEMENT</h2><p>Define and assign prizes</p></div>
+            <div class="grid-2">
+              <div class="card">
+                <h3 class="font-head text-sm" style="letter-spacing:2px;margin-bottom:16px">ASSIGN WINNER</h3>
+                <div class="form-group"><label>SELECT LEAGUE</label>
+                  <select class="form-group select" style="width:100%;background:var(--bg-deep);border:1px solid var(--border);padding:10px;color:var(--text-primary);border-radius:8px;outline:none">
+                    <option>Premier Elite Cup — Season 5</option>
+                    <option>Champions Division — Season 5</option>
+                    <option>Weekend Warriors — Season 5</option>
+                  </select>
+                </div>
+                <div class="form-group"><label>🥇 1ST PLACE</label><input type="text" value="ProStriker99" style="width:100%"></div>
+                <div class="form-group"><label>🥈 2ND PLACE</label><input type="text" value="NightOwl_KE" style="width:100%"></div>
+                <div class="form-group"><label>🥉 3RD PLACE</label><input type="text" value="GhostPlayer" style="width:100%"></div>
+                <button class="btn btn-primary" onclick="showToast('Winners assigned and published!','success')">ASSIGN & PUBLISH</button>
+              </div>
+              <div class="card">
+                <h3 class="font-head text-sm" style="letter-spacing:2px;margin-bottom:16px">PRIZE HISTORY</h3>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div class="card card-sm" style="background:var(--bg-deep)">
+                    <div class="flex justify-between"><span class="font-head text-xs text-green">PREMIER ELITE — S4</span><span class="text-xs text-secondary">Nov 2025</span></div>
+                    <div style="margin-top:8px;font-size:0.82rem">🥇 ProStriker99 · 🥈 NightOwl_KE · 🥉 GhostPlayer</div>
+                    <div class="text-gold font-head" style="font-size:0.9rem;margin-top:4px">KES 150,000</div>
+                  </div>
+                  <div class="card card-sm" style="background:var(--bg-deep)">
+                    <div class="flex justify-between"><span class="font-head text-xs text-green">CHAMPIONS DIV — S3</span><span class="text-xs text-secondary">Aug 2025</span></div>
+                    <div style="margin-top:8px;font-size:0.82rem">🥇 StarPlayer_TZ · 🥈 BlazeMaster · 🥉 QuickFeet99</div>
+                    <div class="text-gold font-head" style="font-size:0.9rem;margin-top:4px">KES 80,000</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PAYMENTS ADMIN -->
+          <div class="admin-section" id="admin-payments">
+            <div class="panel-hdr"><h2>PAYMENTS & SUBSCRIPTIONS</h2><p>Verify transactions and manage access</p></div>
+            <div class="grid-4 mb-20">
+              <div class="stat-card"><div class="stat-icon">💳</div><div class="stat-value">847K</div><div class="stat-label">TOTAL REVENUE (KES)</div></div>
+              <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-value text-warning" style="--neon-green:var(--warning)">7</div><div class="stat-label">PENDING M-PESA</div></div>
+              <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value text-cyan" style="--neon-green:var(--neon-cyan)">342</div><div class="stat-label">CONFIRMED TODAY</div></div>
+              <div class="stat-card"><div class="stat-icon">❌</div><div class="stat-value text-danger" style="--neon-green:var(--danger)">3</div><div class="stat-label">FAILED PAYMENTS</div></div>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>ID</th><th>PLAYER</th><th>TYPE</th><th>AMOUNT</th><th>METHOD</th><th>MPESA REF</th><th>STATUS</th><th>ACTIONS</th></tr></thead>
+                <tbody id="payments-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SUBSCRIPTIONS -->
+          <div class="admin-section" id="admin-subscriptions">
+            <div class="panel-hdr"><h2>SUBSCRIPTIONS</h2><p>Active premium members</p></div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>PLAYER</th><th>PLAN</th><th>START</th><th>EXPIRES</th><th>STATUS</th><th>ACTIONS</th></tr></thead>
+                <tbody id="subs-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ANNOUNCEMENTS ADMIN -->
+          <div class="admin-section" id="admin-announce">
+            <div class="panel-hdr"><h2>ANNOUNCEMENTS</h2><p>Post updates and notifications</p></div>
+            <div class="grid-2">
+              <div class="card">
+                <h3 class="font-head text-sm" style="letter-spacing:2px;margin-bottom:16px">NEW ANNOUNCEMENT</h3>
+                <div class="form-group"><label>TITLE</label><input type="text" id="ann-title" placeholder="Announcement title"></div>
+                <div class="form-group"><label>MESSAGE</label><textarea id="ann-body" rows="4" placeholder="Write your announcement..." style="width:100%;resize:vertical"></textarea></div>
+                <div class="form-group"><label>TARGET</label>
+                  <select style="width:100%;background:var(--bg-deep);border:1px solid var(--border);padding:10px;color:var(--text-primary);border-radius:8px;outline:none">
+                    <option>All Players</option>
+                    <option>Premium Members Only</option>
+                    <option>Premier Elite Cup Players</option>
+                  </select>
+                </div>
+                <div class="flex gap-10">
+                  <button class="btn btn-primary" onclick="postAnnouncement()">📢 PUBLISH</button>
+                  <button class="btn btn-ghost btn-sm" onclick="showToast('Draft saved','success')">SAVE DRAFT</button>
+                </div>
+              </div>
+              <div class="card">
+                <h3 class="font-head text-sm" style="letter-spacing:2px;margin-bottom:16px">PUBLISHED</h3>
+                <div style="display:flex;flex-direction:column;gap:10px" id="admin-announce-list">
+                  <div class="announce-card"><h4>🏆 Season 5 Grand Final</h4><p>The grand finale kicks off December 28...</p><div class="announce-meta"><span>Dec 24</span><span>All Players</span><button class="btn btn-danger btn-sm" onclick="showToast('Announcement deleted','error')">DELETE</button></div></div>
+                  <div class="announce-card"><h4>🎁 Holiday Special Tournament</h4><p>Free entry festive cup with KES 50,000...</p><div class="announce-meta"><span>Dec 20</span><span>All Players</span><button class="btn btn-danger btn-sm" onclick="showToast('Announcement deleted','error')">DELETE</button></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /admin-content -->
+      </div><!-- /admin-grid -->
+    </div><!-- /section-admin -->
+
+  </div><!-- /main-content -->
+
+  <!-- MOBILE NAV -->
+  <div class="mobile-nav" id="player-mobile-nav">
+    <div class="mobile-nav-inner">
+      <button class="mobile-nav-btn active" onclick="showSection('dashboard')"><span class="icon">⚡</span>HOME</button>
+      <button class="mobile-nav-btn" onclick="showSection('leagues')"><span class="icon">🏆</span>LEAGUES</button>
+      <button class="mobile-nav-btn" onclick="showSection('fixtures')"><span class="icon">⚽</span>FIXTURES</button>
+      <button class="mobile-nav-btn" onclick="showSection('standings')"><span class="icon">📊</span>TABLE</button>
+      <button class="mobile-nav-btn" onclick="showSection('profile')"><span class="icon">👤</span>PROFILE</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ===== MODALS ===== -->
+
+<!-- JOIN LEAGUE MODAL -->
+<div class="modal-overlay" id="join-league-modal">
+  <div class="modal">
+    <div class="modal-hdr"><h3>JOIN LEAGUE</h3><button class="modal-close" onclick="closeModal('join-league-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>SELECT LEAGUE</label>
+        <select style="width:100%;background:var(--bg-deep);border:1px solid var(--border);padding:12px;color:var(--text-primary);border-radius:8px;outline:none">
+          <option>Premier Elite Cup — Season 5 (Premium)</option>
+          <option>Weekend Warriors — Season 5 (Free)</option>
+          <option>Champions Division (Premium)</option>
+          <option>Holiday Special Cup (Free)</option>
+        </select>
+      </div>
+      <div style="background:rgba(0,255,136,0.05);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px">
+        <div class="flex justify-between"><span class="text-secondary text-sm">Entry Fee</span><span class="text-green font-head">KES 500</span></div>
+        <div class="flex justify-between mt-8"><span class="text-secondary text-sm">Prize Pool</span><span class="text-gold font-head">KES 150,000</span></div>
+        <div class="flex justify-between mt-8"><span class="text-secondary text-sm">Players</span><span class="text-sm">14/16</span></div>
+        <div class="flex justify-between mt-8"><span class="text-secondary text-sm">Start Date</span><span class="text-sm">Jan 2, 2026</span></div>
+      </div>
+      <p class="text-secondary text-sm">This is a premium league. Payment required to join.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('join-league-modal')">CANCEL</button>
+      <button class="btn btn-primary" onclick="joinLeague()">JOIN & PAY →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="payment-modal">
+  <div class="modal">
+    <div class="modal-hdr"><h3>PAYMENT</h3><button class="modal-close" onclick="closeModal('payment-modal')">✕</button></div>
+    <div class="modal-body">
+      <div style="text-align:center;margin-bottom:20px">
+        <div class="font-head text-green" style="font-size:1.4rem">KES 999</div>
+        <div class="text-secondary text-sm">Premium Monthly Subscription</div>
+      </div>
+      <div class="form-group"><label>CHOOSE PAYMENT METHOD</label></div>
+      <div class="payment-methods">
+        <div class="pay-method selected" onclick="selectPayMethod(this)">
+          <div class="icon">📱</div>
+          <div class="name">M-Pesa</div>
+          <div class="desc">Safaricom</div>
+        </div>
+        <div class="pay-method" onclick="selectPayMethod(this)">
+          <div class="icon">💳</div>
+          <div class="name">Stripe</div>
+          <div class="desc">Card</div>
+        </div>
+        <div class="pay-method" onclick="selectPayMethod(this)">
+          <div class="icon">🅿️</div>
+          <div class="name">PayPal</div>
+          <div class="desc">Online</div>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <div class="form-group"><label>M-PESA PHONE NUMBER</label><input type="tel" placeholder="254712345678" value="254712345678"></div>
+        <div style="background:rgba(0,255,136,0.05);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px;font-size:0.82rem;color:var(--text-secondary)">
+          You'll receive an M-Pesa STK push prompt. Enter your PIN to complete payment.
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('payment-modal')">CANCEL</button>
+      <button class="btn btn-primary" onclick="processPayment()">💳 PAY NOW</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT PROFILE MODAL -->
+<div class="modal-overlay" id="edit-profile-modal">
+  <div class="modal">
+    <div class="modal-hdr"><h3>EDIT PROFILE</h3><button class="modal-close" onclick="closeModal('edit-profile-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>USERNAME</label><input type="text" id="edit-username" value="ProStriker99"></div>
+      <div class="form-group"><label>BIO</label><textarea rows="3" id="edit-bio" style="width:100%;resize:vertical">Elite eFootball competitor from Nairobi. Specializing in counter-attack tactics. 3x league champion.</textarea></div>
+      <div class="form-group"><label>AVATAR EMOJI</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <span style="font-size:1.5rem;cursor:pointer;padding:6px;border:1px solid var(--border);border-radius:6px" onclick="setAvatar('⚡')">⚡</span>
+          <span style="font-size:1.5rem;cursor:pointer;padding:6px;border:1px solid var(--border);border-radius:6px" onclick="setAvatar('🦅')">🦅</span>
+          <span style="font-size:1.5rem;cursor:pointer;padding:6px;border:1px solid var(--border);border-radius:6px" onclick="setAvatar('🐉')">🐉</span>
+          <span style="font-size:1.5rem;cursor:pointer;padding:6px;border:1px solid var(--border);border-radius:6px" onclick="setAvatar('🔥')">🔥</span>
+          <span style="font-size:1.5rem;cursor:pointer;padding:6px;border:1px solid var(--border);border-radius:6px" onclick="setAvatar('💀')">💀</span>
+          <span style="font-size:1.5rem;cursor:pointer;padding:6px;border:1px solid var(--border);border-radius:6px" onclick="setAvatar('🎯')">🎯</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('edit-profile-modal')">CANCEL</button>
+      <button class="btn btn-primary" onclick="saveProfile()">SAVE CHANGES</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE LEAGUE MODAL (ADMIN) -->
+<div class="modal-overlay" id="create-league-modal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-hdr"><h3>CREATE LEAGUE</h3><button class="modal-close" onclick="closeModal('create-league-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="grid-2" style="gap:14px">
+        <div class="form-group"><label>LEAGUE NAME</label><input type="text" id="new-league-name" placeholder="Premier Elite Cup S6"></div>
+        <div class="form-group"><label>TYPE</label>
+          <select id="new-league-type" style="width:100%;background:var(--bg-deep);border:1px solid var(--border);padding:12px;color:var(--text-primary);border-radius:8px;outline:none">
+            <option value="free">Free</option>
+            <option value="premium">Premium</option>
+          </select>
+        </div>
+        <div class="form-group"><label>MAX PLAYERS</label><input type="number" id="new-league-max" value="16"></div>
+        <div class="form-group"><label>ENTRY FEE (KES)</label><input type="number" id="new-league-fee" value="500"></div>
+        <div class="form-group"><label>PRIZE POOL (KES)</label><input type="number" id="new-league-prize" value="150000"></div>
+        <div class="form-group"><label>1ST PLACE (KES)</label><input type="number" value="80000"></div>
+        <div class="form-group"><label>2ND PLACE (KES)</label><input type="number" value="40000"></div>
+        <div class="form-group"><label>3RD PLACE (KES)</label><input type="number" value="20000"></div>
+        <div class="form-group"><label>START DATE</label><input type="date" id="new-league-start"></div>
+        <div class="form-group"><label>ROUNDS</label><input type="number" value="10"></div>
+      </div>
+      <div class="form-group mt-12"><label>RULES</label><textarea rows="3" placeholder="League rules and regulations..." style="width:100%;resize:vertical">Standard eFootball rules apply. All matches best of 1. Results must be submitted within 24 hours.</textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('create-league-modal')">CANCEL</button>
+      <button class="btn btn-primary" onclick="createLeague()">CREATE LEAGUE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD USER MODAL (ADMIN) -->
+<div class="modal-overlay" id="add-user-modal">
+  <div class="modal">
+    <div class="modal-hdr"><h3>ADD USER</h3><button class="modal-close" onclick="closeModal('add-user-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>USERNAME</label><input type="text" placeholder="Username"></div>
+      <div class="form-group"><label>EMAIL</label><input type="email" placeholder="email@example.com"></div>
+      <div class="form-group"><label>ROLE</label>
+        <select style="width:100%;background:var(--bg-deep);border:1px solid var(--border);padding:12px;color:var(--text-primary);border-radius:8px;outline:none">
+          <option>Player</option>
+          <option>Admin</option>
+        </select>
+      </div>
+      <div class="form-group"><label>TEMPORARY PASSWORD</label><input type="password" placeholder="Will be emailed to user"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('add-user-modal')">CANCEL</button>
+      <button class="btn btn-primary" onclick="addUser()">CREATE USER</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT MODAL -->
+<div class="modal-overlay" id="result-modal">
+  <div class="modal">
+    <div class="modal-hdr"><h3>SUBMIT RESULT</h3><button class="modal-close" onclick="closeModal('result-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="fixture-card" style="margin-bottom:20px;cursor:default">
+        <div class="fixture-team"><div class="fixture-team avatar" id="r-home-av">P</div><div class="fixture-team name" id="r-home">ProStriker99</div></div>
+        <div class="fixture-vs">
+          <div style="display:flex;gap:12px;align-items:center;margin:8px 0">
+            <input type="number" id="r-home-score" min="0" max="99" value="0" style="width:60px;text-align:center;font-family:var(--font-head);font-size:1.4rem;background:var(--bg-deep);border:1px solid var(--border);border-radius:8px;color:var(--neon-green);padding:8px;outline:none">
+            <span class="text-muted font-head">–</span>
+            <input type="number" id="r-away-score" min="0" max="99" value="0" style="width:60px;text-align:center;font-family:var(--font-head);font-size:1.4rem;background:var(--bg-deep);border:1px solid var(--border);border-radius:8px;color:var(--neon-green);padding:8px;outline:none">
+          </div>
+          <div class="vs">VS</div>
+        </div>
+        <div class="fixture-team"><div class="fixture-team avatar" id="r-away-av">N</div><div class="fixture-team name" id="r-away">NightOwl_KE</div></div>
+      </div>
+      <p class="text-secondary text-sm">Screenshot or proof may be required by admin.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('result-modal')">CANCEL</button>
+      <button class="btn btn-primary" onclick="submitResult()">SUBMIT RESULT</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<script>
+// =============================================
+// STATE
+// =============================================
+let state = {
+  isLoggedIn: false,
+  isAdmin: false,
+  currentUser: null,
+  currentSection: 'dashboard',
+  currentAdminSection: 'admin-overview',
+  currentChatRoom: 'Global Chat',
+  userAvatar: 'P',
+  chatMessages: {
+    'Global Chat': [
+      {user:'GhostPlayer',av:'G',text:"Anyone up for a friendly match tonight?",time:'20:14',mine:false},
+      {user:'NightOwl_KE',av:'N',text:"gg wp to everyone in yesterday's tourney!",time:'20:18',mine:false},
+      {user:'StarPlayer_TZ',av:'S',text:"That final was INTENSE 🔥",time:'20:22',mine:false},
+      {user:'You',av:'P',text:"Ready for the championship next week 💪",time:'20:25',mine:true},
+      {user:'BlazeMaster',av:'B',text:"See you all on the pitch! GLHF",time:'20:31',mine:false},
+    ],
+    '🏆 Premier Elite Cup': [
+      {user:'NightOwl_KE',av:'N',text:"Finals are coming... who's ready?",time:'19:40',mine:false},
+      {user:'You',av:'P',text:"I've been training all week 🎮",time:'19:45',mine:true},
+    ],
+    '⚡ Champions Division': [
+      {user:'StarPlayer_TZ',av:'S',text:"Champions represent!",time:'18:00',mine:false},
+    ],
+    '🎮 Weekend Warriors': [
+      {user:'Blazer',av:'B',text:"See you Saturday crew!",time:'17:00',mine:false},
+    ],
+    '💬 GhostPlayer': [
+      {user:'GhostPlayer',av:'G',text:"Let's play Friday?",time:'16:00',mine:false},
+      {user:'You',av:'P',text:"Sounds good, 8PM?",time:'16:02',mine:true},
+    ],
+    '💬 NightOwl_KE': [
+      {user:'NightOwl_KE',av:'N',text:"gg last match bro",time:'15:00',mine:false},
+    ]
+  }
+};
+
+const LEAGUES = [
+  {id:1,name:'Premier Elite Cup',type:'premium',status:'ongoing',players:14,maxPlayers:16,prize:150000,entry:500,description:'The flagship NexaLeague competition for elite players.',rules:'Standard eFootball rules. All matches best of 1. Results must be submitted within 24 hours.',start:'Jan 2, 2026',joined:true},
+  {id:2,name:'Champions Division',type:'premium',status:'ongoing',players:16,maxPlayers:16,prize:80000,entry:0,description:'Top-tier competitive division for ranked players.',rules:'Double round robin format. 3pts for win, 1 draw.',start:'Dec 15, 2025',joined:false},
+  {id:3,name:'Weekend Warriors',type:'free',status:'ongoing',players:12,maxPlayers:16,prize:30000,entry:0,description:'Casual weekend league for all skill levels.',rules:'Everyone is welcome. Play at your own pace.',start:'Dec 10, 2025',joined:true},
+  {id:4,name:'Holiday Special Cup',type:'free',status:'upcoming',players:6,maxPlayers:32,prize:50000,entry:0,description:'Special festive tournament with a huge free prize pool!',rules:'Single elimination format. Round of 32.',start:'Dec 28, 2025',joined:false},
+  {id:5,name:'Pro Series S5',type:'premium',status:'upcoming',players:2,maxPlayers:16,prize:200000,entry:1000,description:'Highest level of competition. Invitation + payment required.',rules:'Round robin then knockout. Pro-level rules enforced.',start:'Jan 10, 2026',joined:false},
+  {id:6,name:'Season 4 Grand Slam',type:'premium',status:'completed',players:16,maxPlayers:16,prize:120000,entry:500,description:'Season 4 is complete. Check the prize history.',rules:'Completed.',start:'Oct 2025',joined:false},
+];
+
+const FIXTURES = [
+  {id:1,home:'ProStriker99',away:'NightOwl_KE',score:'3-1',status:'done',league:'Premier Elite Cup',date:'Dec 22'},
+  {id:2,home:'GhostPlayer',away:'StarPlayer_TZ',score:'2-2',status:'done',league:'Premier Elite Cup',date:'Dec 22'},
+  {id:3,home:'BlazeMaster',away:'QuickFeet99',score:'4-0',status:'done',league:'Champions Division',date:'Dec 21'},
+  {id:4,home:'ProStriker99',away:'GhostPlayer',score:'',status:'live',league:'Premier Elite Cup',date:'Dec 24 • LIVE'},
+  {id:5,home:'NightOwl_KE',away:'BlazeMaster',score:'',status:'scheduled',league:'Premier Elite Cup',date:'Dec 26'},
+  {id:6,home:'QuickFeet99',away:'ProStriker99',score:'',status:'scheduled',league:'Champions Division',date:'Dec 27'},
+  {id:7,home:'StarPlayer_TZ',away:'CasualKing',score:'',status:'scheduled',league:'Weekend Warriors',date:'Dec 28'},
+];
+
+const STANDINGS_DATA = [
+  ['ProStriker99',12,9,1,2,34,12,22,28,['W','W','D','W','W']],
+  ['NightOwl_KE',12,8,2,2,29,15,14,26,['W','D','W','W','L']],
+  ['GhostPlayer',12,7,3,2,24,14,10,24,['D','W','L','W','W']],
+  ['StarPlayer_TZ',12,6,2,4,22,18,4,20,['W','L','W','D','L']],
+  ['BlazeMaster',12,5,4,3,20,20,0,19,['D','D','W','L','W']],
+  ['QuickFeet99',12,5,2,5,18,22,-4,17,['L','W','D','L','W']],
+  ['CasualKing',12,4,3,5,16,24,-8,15,['D','L','D','W','L']],
+  ['WeekendFighter',12,3,2,7,14,28,-14,11,['L','L','W','D','L']],
+];
+
+const USERS = [
+  {id:1,name:'ProStriker99',email:'player@nexaleague.gg',role:'player',status:'active',leagues:3,joined:'Jan 2025'},
+  {id:2,name:'NightOwl_KE',email:'nightowl@gmail.com',role:'player',status:'active',leagues:2,joined:'Feb 2025'},
+  {id:3,name:'GhostPlayer',email:'ghost@email.com',role:'player',status:'active',leagues:2,joined:'Mar 2025'},
+  {id:4,name:'StarPlayer_TZ',email:'star@tz.com',role:'player',status:'active',leagues:1,joined:'Apr 2025'},
+  {id:5,name:'BlazeMaster',email:'blaze@email.com',role:'player',status:'suspended',leagues:1,joined:'May 2025'},
+  {id:6,name:'Admin_Brian',email:'admin@nexaleague.gg',role:'admin',status:'active',leagues:0,joined:'Jan 2025'},
+];
+
+const PAYMENTS = [
+  {id:'TX001',player:'ProStriker99',type:'Premium Monthly',amount:'KES 999',method:'M-Pesa',ref:'QK8X2P',status:'confirmed'},
+  {id:'TX002',player:'NightOwl_KE',type:'League Entry',amount:'KES 500',method:'Stripe',ref:'—',status:'confirmed'},
+  {id:'TX003',player:'GhostPlayer',type:'Premium Monthly',amount:'KES 999',method:'M-Pesa',ref:'RJ4M7N',status:'pending'},
+  {id:'TX004',player:'StarPlayer_TZ',type:'League Entry',amount:'KES 1,000',method:'PayPal',ref:'—',status:'confirmed'},
+  {id:'TX005',player:'CasualKing',type:'League Entry',amount:'KES 500',method:'M-Pesa',ref:'BX9K1L',status:'failed'},
+];
+
+const SUBS = [
+  {player:'ProStriker99',plan:'Premium Monthly',start:'Dec 15, 2025',expires:'Jan 15, 2026',status:'active'},
+  {player:'NightOwl_KE',plan:'Premium Monthly',start:'Nov 1, 2025',expires:'Dec 1, 2025',status:'expired'},
+  {player:'GhostPlayer',plan:'League Entry Pass',start:'Dec 20, 2025',expires:'Jan 20, 2026',status:'active'},
+  {player:'StarPlayer_TZ',plan:'Premium Monthly',start:'Dec 10, 2025',expires:'Jan 10, 2026',status:'active'},
+];
+
+// =============================================
+// AUTH
+// =============================================
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f=>f.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('form-'+tab).classList.add('active');
+}
+
+function doLogin() {
+  const email = document.getElementById('login-email').value;
+  if(!email){ showToast('Enter your email','error'); return; }
+  state.currentUser = {username:'ProStriker99',email,role:'player'};
+  state.isAdmin = false;
+  loginSuccess();
+}
+
+function doAdminLogin() {
+  state.currentUser = {username:'Admin_Brian',email:'admin@nexaleague.gg',role:'admin'};
+  state.isAdmin = true;
+  loginSuccess();
+}
+
+function doRegister() {
+  const u = document.getElementById('reg-username').value;
+  const e = document.getElementById('reg-email').value;
+  const p = document.getElementById('reg-pass').value;
+  const p2 = document.getElementById('reg-pass2').value;
+  if(!u||!e||!p){ showToast('Fill all fields','error'); return; }
+  if(p!==p2){ showToast('Passwords do not match','error'); return; }
+  if(p.length<8){ showToast('Password too short (min 8)','error'); return; }
+  state.currentUser = {username:u,email:e,role:'player'};
+  state.isAdmin = false;
+  loginSuccess();
+  showToast(`Welcome, ${u}! Account created ⚡`,'success');
+}
+
+function loginSuccess() {
+  document.getElementById('page-auth').classList.remove('active');
+  document.getElementById('app').classList.add('active');
+  document.getElementById('welcome-title').textContent = `READY TO DOMINATE, ${state.currentUser.username.toUpperCase()}?`;
+  document.getElementById('profile-username').textContent = state.currentUser.username;
+  document.getElementById('profile-handle').textContent = '@'+state.currentUser.username.toLowerCase().replace(/\s/g,'');
+  const av = state.currentUser.username.charAt(0).toUpperCase();
+  state.userAvatar = av;
+  document.getElementById('user-avatar').textContent = av;
+  document.getElementById('profile-avatar-display').textContent = av;
+  if(state.isAdmin) {
+    showAdminView();
+  } else {
+    showPlayerView();
+  }
+  initializeApp();
+}
+
+function logout() {
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('page-auth').classList.add('active');
+  showToast('Logged out successfully','success');
+}
+
+function switchRole() {
+  if(state.isAdmin) {
+    state.isAdmin = false;
+    state.currentUser.role = 'player';
+    showPlayerView();
+    showSection('dashboard');
+    showToast('Switched to Player view','success');
+  } else {
+    state.isAdmin = true;
+    state.currentUser.role = 'admin';
+    showAdminView();
+    showToast('Switched to Admin console','success');
+  }
+}
+
+function showPlayerView() {
+  document.getElementById('player-nav').style.display='flex';
+  document.getElementById('admin-nav').style.display='none';
+  document.getElementById('player-mobile-nav').style.display='block';
+  document.getElementById('role-switch-btn').title='Switch to Admin';
+  document.getElementById('role-switch-btn').textContent='⚙️';
+}
+
+function showAdminView() {
+  document.getElementById('player-nav').style.display='none';
+  document.getElementById('admin-nav').style.display='flex';
+  document.getElementById('player-mobile-nav').style.display='none';
+  document.getElementById('role-switch-btn').title='Switch to Player';
+  document.getElementById('role-switch-btn').textContent='🎮';
+  showSection('admin');
+  showAdminSection('admin-overview');
+}
+
+// =============================================
+// NAVIGATION
+// =============================================
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('section-'+name).classList.add('active');
+  state.currentSection = name;
+  // Update nav highlights
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('active'));
+  const navMap = {dashboard:'dashboard',leagues:'leagues',fixtures:'fixtures',standings:'standings',community:'community',prizes:'prizes',profile:'profile'};
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    if(b.textContent.toLowerCase().includes(name.toLowerCase().split('-')[0]) || (name==='dashboard'&&b.textContent.includes('DASHBOARD'))) b.classList.add('active');
+  });
+}
+
+function showAdminSection(sectionId, btn) {
+  document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
+  const el = document.getElementById(sectionId);
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.admin-nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else {
+    document.querySelectorAll('.admin-nav-btn').forEach(b=>{
+      if(b.onclick&&b.onclick.toString().includes(sectionId)) b.classList.add('active');
+    });
+  }
+  state.currentAdminSection = sectionId;
+  showSection('admin');
+}
+
+function switchTab(groupId, tabId, btn) {
+  const parent = btn ? btn.closest('.tabs') : null;
+  if(parent) parent.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  // Find siblings
+  const content = document.getElementById(tabId);
+  if(!content) return;
+  const allContents = content.parentElement.querySelectorAll('.tab-content');
+  allContents.forEach(c=>c.classList.remove('active'));
+  content.classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+// =============================================
+// INITIALIZE APP DATA
+// =============================================
+function initializeApp() {
+  renderLeagues('all');
+  renderFixtures('all');
+  renderStandings();
+  renderRecentMatches();
+  renderUpcoming();
+  renderMyLeaguesMini();
+  renderHistory();
+  renderUsersTable();
+  renderAdminLeagues();
+  renderPendingMatches();
+  renderAllMatchesTable();
+  renderPaymentsTable();
+  renderSubsTable();
+  renderPrizePools();
+  renderCharts();
+  renderChatMessages(state.currentChatRoom);
+}
+
+// =============================================
+// LEAGUES
+// =============================================
+function renderLeagues(filter) {
+  const grid = document.getElementById('leagues-grid');
+  const filtered = filter==='all' ? LEAGUES : LEAGUES.filter(l=>{
+    if(filter==='free') return l.type==='free';
+    if(filter==='premium') return l.type==='premium';
+    return l.status===filter;
+  });
+  grid.innerHTML = filtered.map(l=>`
+    <div class="league-card" onclick="showLeagueDetail(${l.id})">
+      <div>
+        <span class="league-badge badge-${l.type}">${l.type==='premium'?'⭐ PREMIUM':'🆓 FREE'}</span>
+        <span class="league-badge badge-${l.status}" style="margin-left:6px">${l.status.toUpperCase()}</span>
+      </div>
+      <h3>${l.name}</h3>
+      <p class="text-secondary text-sm" style="margin-top:6px">${l.description}</p>
+      <div class="league-meta">
+        <span>👥 ${l.players}/${l.maxPlayers}</span>
+        <span>📅 ${l.start}</span>
+        ${l.entry>0?`<span class="text-green">💳 KES ${l.entry.toLocaleString()} entry</span>`:'<span class="text-green">🆓 Free entry</span>'}
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(l.players/l.maxPlayers*100)}%"></div></div>
+      <div class="league-prize">🏆 KES ${l.prize.toLocaleString()}</div>
+      <div class="league-actions">
+        ${l.joined?`<span class="badge badge-free">✓ JOINED</span>`:''}
+        ${l.status==='ongoing'&&l.joined?`<button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();showSection('standings')">VIEW TABLE</button>`:''}
+        ${!l.joined&&l.status!=='completed'?`<button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openModal('join-league-modal')">JOIN</button>`:''}
+        ${l.status==='completed'?`<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();showSection('prizes')">VIEW RESULTS</button>`:''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterLeagues(filter, btn) {
+  document.querySelectorAll('#league-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderLeagues(filter);
+}
+
+function showLeagueDetail(id) {
+  const l = LEAGUES.find(x=>x.id===id);
+  if(!l) return;
+  const html = `
+    <div class="flex gap-12 items-center mb-20 flex-wrap">
+      <h2 class="font-head" style="font-size:1.4rem;background:linear-gradient(135deg,var(--text-primary),var(--neon-green));-webkit-background-clip:text;-webkit-text-fill-color:transparent">${l.name}</h2>
+      <span class="league-badge badge-${l.type}">${l.type==='premium'?'⭐ PREMIUM':'🆓 FREE'}</span>
+      <span class="league-badge badge-${l.status}">${l.status.toUpperCase()}</span>
+    </div>
+    <div class="grid-2 mb-20">
+      <div class="card">
+        <h3 class="font-head text-sm" style="letter-spacing:2px;margin-bottom:16px">LEAGUE INFO</h3>
+        <p class="text-secondary" style="margin-bottom:16px">${l.description}</p>
+        <div class="flex justify-between mt-8"><span class="text-secondary text-sm">Players</span><span class="font-head text-green">${l.players}/${l.maxPlayers}</span></div>
+        <div class="flex justify-between mt-8"><span class="text-secondary text-sm">Start Date</span><span>${l.start}</span></div>
+        <div class="flex justify-between mt-8"><span class="text-secondary text-sm">Entry Fee</span><span class="font-head">${l.entry>0?'KES '+l.entry.toLocaleString():'FREE'}</span></div>
+        <div class="flex justify-between mt-8"><span class="text-secondary text-sm">Status</span><span class="badge badge-${l.status}" style="padding:2px 8px;display:inline-block">${l.status}</span></div>
+        <div class="progress-bar" style="margin-top:16px"><div class="progress-fill" style="width:${Math.round(l.players/l.maxPlayers*100)}%"></div></div>
+        <div style="margin-top:16px">
+          ${!l.joined&&l.status!=='completed'?`<button class="btn btn-primary" onclick="openModal('join-league-modal')">JOIN LEAGUE</button>`:`<span class="badge badge-free" style="padding:8px 16px">✓ JOINED</span>`}
+        </div>
+      </div>
+      <div class="card">
+        <h3 class="font-head text-sm" style="letter-spacing:2px;margin-bottom:16px">🏆 PRIZE STRUCTURE</h3>
+        <div class="podium">
+          <div class="podium-step" style="order:1">
+            <div class="podium-block second"><div class="podium-icon">🥈</div></div>
+            <div class="podium-name">2nd Place</div>
+            <div class="podium-prize">KES ${Math.round(l.prize*0.27).toLocaleString()}</div>
+          </div>
+          <div class="podium-step" style="order:0">
+            <div class="podium-block first"><div class="podium-icon">🥇</div></div>
+            <div class="podium-name">1st Place</div>
+            <div class="podium-prize">KES ${Math.round(l.prize*0.53).toLocaleString()}</div>
+          </div>
+          <div class="podium-step" style="order:2">
+            <div class="podium-block third"><div class="podium-icon">🥉</div></div>
+            <div class="podium-name">3rd Place</div>
+            <div class="podium-prize">KES ${Math.round(l.prize*0.13).toLocaleString()}</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:12px">
+          <div class="text-gold font-head" style="font-size:1.4rem">KES ${l.prize.toLocaleString()}</div>
+          <div class="text-secondary text-sm">Total Prize Pool</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 class="font-head text-sm" style="letter-spacing:2px;margin-bottom:16px">📋 RULES</h3>
+      <p class="text-secondary">${l.rules}</p>
+    </div>
+  `;
+  document.getElementById('league-detail-content').innerHTML = html;
+  showSection('league-detail');
+}
+
+// =============================================
+// FIXTURES
+// =============================================
+function renderFixtures(filter) {
+  const list = document.getElementById('fixtures-list');
+  const filtered = filter==='all' ? FIXTURES : FIXTURES.filter(f=>f.status===filter);
+  list.innerHTML = filtered.map(f=>`
+    <div class="fixture-card">
+      <div class="fixture-team">
+        <div class="fixture-team avatar" style="width:44px;height:44px;border-radius:50%;border:2px solid var(--border);background:linear-gradient(135deg,var(--neon-green),var(--neon-cyan));display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-family:var(--font-head);font-weight:700;font-size:0.8rem;color:#000">${f.home.charAt(0)}</div>
+        <div class="fixture-team name" style="font-family:var(--font-head);font-size:0.85rem;font-weight:600">${f.home}</div>
+      </div>
+      <div class="fixture-vs">
+        ${f.status==='done'?`<div class="score" style="font-family:var(--font-head);font-size:1.8rem;font-weight:900;background:linear-gradient(135deg,var(--neon-green),var(--neon-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">${f.score}</div>`:''}
+        ${f.status==='live'?`<div class="score" style="font-family:var(--font-head);font-size:1.8rem;font-weight:900;color:var(--danger)">LIVE 🔴</div>`:''}
+        ${f.status==='scheduled'?`<div style="font-family:var(--font-head);font-size:1rem;color:var(--text-muted)">VS</div>`:''}
+        <div class="text-secondary text-xs" style="margin-top:6px">${f.league}</div>
+        <div class="text-muted text-xs" style="margin-top:2px">${f.date}</div>
+      </div>
+      <div class="fixture-team">
+        <div style="width:44px;height:44px;border-radius:50%;border:2px solid var(--border);background:linear-gradient(135deg,var(--neon-purple),var(--neon-pink));display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-family:var(--font-head);font-weight:700;font-size:0.8rem;color:#fff">${f.away.charAt(0)}</div>
+        <div class="fixture-team name" style="font-family:var(--font-head);font-size:0.85rem;font-weight:600">${f.away}</div>
+      </div>
+    </div>
+    ${f.status==='scheduled'?`<div style="text-align:center;margin-top:-8px"><button class="btn btn-secondary btn-sm" onclick="openResultModal('${f.home}','${f.away}')">SUBMIT RESULT</button></div>`:''}
+  `).join('');
+}
+
+function filterFixtures(filter, btn) {
+  renderFixtures(filter);
+}
+
+function openResultModal(home, away) {
+  document.getElementById('r-home').textContent = home;
+  document.getElementById('r-away').textContent = away;
+  document.getElementById('r-home-av').textContent = home.charAt(0);
+  document.getElementById('r-away-av').textContent = away.charAt(0);
+  openModal('result-modal');
+}
+
+function submitResult() {
+  const h = document.getElementById('r-home-score').value;
+  const a = document.getElementById('r-away-score').value;
+  closeModal('result-modal');
+  showToast(`Result submitted: ${h} — ${a}. Awaiting admin approval.`,'success');
+}
+
+// =============================================
+// STANDINGS
+// =============================================
+function renderStandings() {
+  const tbody = document.getElementById('standings-body');
+  tbody.innerHTML = STANDINGS_DATA.map((p,i)=>{
+    const [name,mp,w,d,l,gf,ga,gd,pts,form] = p;
+    const pos = i+1;
+    const posClass = pos<=2?'pos-up':pos>=7?'pos-down':'pos-same';
+    const rankClass = pos===1?'rank-1':pos===2?'rank-2':pos===3?'rank-3':'';
+    const formHTML = form.map(f=>{
+      const c = f==='W'?'var(--neon-green)':f==='D'?'var(--text-secondary)':'var(--danger)';
+      return `<span style="width:22px;height:22px;border-radius:4px;background:${c};color:#000;display:inline-flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;font-family:var(--font-head)">${f}</span>`;
+    }).join('');
+    return `<tr>
+      <td><span class="${rankClass}">${pos===1?'🥇':pos===2?'🥈':pos===3?'🥉':pos}</span><span class="pos-indicator ${posClass}" style="margin-left:6px"></span></td>
+      <td><b>${name}</b>${name==='ProStriker99'?'<span style="margin-left:6px;font-size:0.7rem;color:var(--neon-green)">(YOU)</span>':''}</td>
+      <td>${mp}</td><td>${w}</td><td>${d}</td><td>${l}</td>
+      <td>${gf}</td><td>${ga}</td>
+      <td class="${gd>0?'text-green':gd<0?'text-danger':''}">${gd>0?'+'+gd:gd}</td>
+      <td><b class="${rankClass}" style="font-family:var(--font-head);font-size:1rem">${pts}</b></td>
+      <td><div style="display:flex;gap:3px">${formHTML}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+// =============================================
+// DASHBOARD HELPERS
+// =============================================
+function renderRecentMatches() {
+  const el = document.getElementById('recent-matches-list');
+  const recent = FIXTURES.filter(f=>f.status==='done').slice(0,3);
+  el.innerHTML = recent.map(f=>{
+    const [h,a] = f.score.split('-').map(Number);
+    const isHome = f.home==='ProStriker99';
+    const myScore = isHome?h:a, oppScore = isHome?a:h;
+    const result = myScore>oppScore?'W':myScore<oppScore?'L':'D';
+    const rc = result==='W'?'var(--neon-green)':result==='L'?'var(--danger)':'var(--text-secondary)';
+    return `<div class="flex justify-between items-center" style="padding:12px;background:var(--bg-deep);border-radius:8px;border:1px solid var(--border)">
+      <div><div style="font-size:0.82rem;font-weight:600">${f.home} vs ${f.away}</div><div class="text-muted text-xs">${f.league} · ${f.date}</div></div>
+      <div class="flex items-center gap-12">
+        <span class="font-head" style="font-size:1rem">${f.score}</span>
+        <span style="width:28px;height:28px;border-radius:6px;background:${rc};color:#000;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:0.7rem;font-weight:900">${result}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderUpcoming() {
+  const el = document.getElementById('upcoming-list');
+  const up = FIXTURES.filter(f=>f.status==='scheduled').slice(0,3);
+  el.innerHTML = up.map(f=>`
+    <div class="flex justify-between items-center" style="padding:12px;background:var(--bg-deep);border-radius:8px;border:1px solid var(--border)">
+      <div><div style="font-size:0.82rem;font-weight:600">${f.home} <span class="text-muted">vs</span> ${f.away}</div><div class="text-muted text-xs">${f.league}</div></div>
+      <div class="flex items-center gap-8">
+        <span class="text-cyan text-xs font-head">${f.date}</span>
+        <button class="btn btn-secondary btn-sm" onclick="openResultModal('${f.home}','${f.away}')">RESULT</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderMyLeaguesMini() {
+  const el = document.getElementById('my-leagues-mini');
+  const my = LEAGUES.filter(l=>l.joined);
+  el.innerHTML = my.map(l=>`
+    <div class="flex justify-between items-center" style="padding:12px;background:var(--bg-deep);border-radius:8px;border:1px solid var(--border);margin-bottom:8px;cursor:pointer" onclick="showLeagueDetail(${l.id})">
+      <div><div style="font-size:0.88rem;font-weight:600">${l.name}</div><div class="text-muted text-xs">${l.players}/${l.maxPlayers} players</div></div>
+      <div class="flex items-center gap-8">
+        <span class="league-badge badge-${l.status}" style="font-size:0.6rem">${l.status.toUpperCase()}</span>
+        <span class="text-green text-xs">→</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderHistory() {
+  const tbody = document.getElementById('history-tbody');
+  const data = [
+    {date:'Dec 22',league:'Premier Elite Cup',opp:'NightOwl_KE',score:'3-1',result:'W'},
+    {date:'Dec 20',league:'Champions Division',opp:'BlazeMaster',score:'2-0',result:'W'},
+    {date:'Dec 18',league:'Weekend Warriors',opp:'CasualKing',score:'1-1',result:'D'},
+    {date:'Dec 15',league:'Premier Elite Cup',opp:'GhostPlayer',score:'0-2',result:'L'},
+    {date:'Dec 12',league:'Weekend Warriors',opp:'QuickFeet99',score:'4-1',result:'W'},
+  ];
+  tbody.innerHTML = data.map(d=>{
+    const rc = d.result==='W'?'var(--neon-green)':d.result==='L'?'var(--danger)':'var(--text-secondary)';
+    return `<tr>
+      <td class="text-secondary">${d.date}</td>
+      <td>${d.league}</td>
+      <td>${d.opp}</td>
+      <td class="font-head">${d.score}</td>
+      <td><span style="width:28px;height:28px;border-radius:6px;background:${rc};color:#000;display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:0.7rem;font-weight:900">${d.result}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// =============================================
+// PRIZES
+// =============================================
+function renderPrizePools() {
+  const grid = document.getElementById('prize-pools-grid');
+  grid.innerHTML = LEAGUES.filter(l=>l.status==='ongoing').map(l=>`
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <h3 class="font-head" style="font-size:0.9rem">${l.name}</h3>
+          <span class="league-badge badge-${l.status}" style="font-size:0.6rem;margin-top:4px;display:inline-block">${l.status.toUpperCase()}</span>
+        </div>
+        <div class="text-gold font-head" style="font-size:1.1rem">KES ${l.prize.toLocaleString()}</div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div class="flex justify-between" style="padding:8px;background:rgba(255,215,0,0.06);border-radius:6px;border:1px solid rgba(255,215,0,0.15);margin-bottom:6px">
+          <span class="text-xs">🥇 1st Place</span><span class="text-gold font-head text-xs">KES ${Math.round(l.prize*0.53).toLocaleString()}</span>
+        </div>
+        <div class="flex justify-between" style="padding:8px;background:rgba(192,192,192,0.05);border-radius:6px;border:1px solid rgba(192,192,192,0.15);margin-bottom:6px">
+          <span class="text-xs">🥈 2nd Place</span><span style="color:var(--silver)" class="font-head text-xs">KES ${Math.round(l.prize*0.27).toLocaleString()}</span>
+        </div>
+        <div class="flex justify-between" style="padding:8px;background:rgba(205,127,50,0.05);border-radius:6px;border:1px solid rgba(205,127,50,0.15)">
+          <span class="text-xs">🥉 3rd Place</span><span style="color:var(--bronze)" class="font-head text-xs">KES ${Math.round(l.prize*0.13).toLocaleString()}</span>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(l.players/l.maxPlayers*100)}%"></div></div>
+      <div class="text-muted text-xs mt-8">${l.players}/${l.maxPlayers} players enrolled</div>
+    </div>
+  `).join('');
+}
+
+// =============================================
+// CHAT
+// =============================================
+function renderChatMessages(room) {
+  const msgs = state.chatMessages[room] || [];
+  const container = document.getElementById('chat-messages');
+  container.innerHTML = msgs.map(m=>`
+    <div class="msg ${m.mine?'mine':''}">
+      <div class="msg-av" style="${m.mine?'background:linear-gradient(135deg,var(--neon-green),var(--neon-cyan));color:#000':'background:linear-gradient(135deg,var(--neon-purple),var(--neon-cyan))'}">${m.av}</div>
+      <div class="msg-body">
+        <div class="msg-meta">${m.mine?'You':m.user} · ${m.time}</div>
+        <div class="msg-text">${m.text}</div>
+      </div>
+    </div>
+  `).join('');
+  container.scrollTop = container.scrollHeight;
+}
+
+function switchChatRoom(el, name, desc) {
+  document.querySelectorAll('.chat-room-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  el.querySelector('.unread-badge')?.remove();
+  state.currentChatRoom = name;
+  document.getElementById('chat-room-name').textContent = name;
+  document.getElementById('chat-room-desc').textContent = desc + ' • Real-time';
+  if(!state.chatMessages[name]) state.chatMessages[name]=[];
+  renderChatMessages(name);
+}
+
+function sendChatMsg() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text) return;
+  const now = new Date();
+  const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const room = state.currentChatRoom;
+  if(!state.chatMessages[room]) state.chatMessages[room]=[];
+  state.chatMessages[room].push({user:'You',av:state.userAvatar,text,time,mine:true});
+  input.value='';
+  renderChatMessages(room);
+  // Simulate reply
+  setTimeout(()=>{
+    const replies = ["Nice one! 🔥","gg wp!","Let's go! ⚽","Bring it on 💪","GLHF everyone!","That's the spirit! 🏆"];
+    const names = ['GhostPlayer','NightOwl_KE','BlazeMaster','StarPlayer_TZ'];
+    const avs = ['G','N','B','S'];
+    const idx = Math.floor(Math.random()*names.length);
+    state.chatMessages[room].push({user:names[idx],av:avs[idx],text:replies[Math.floor(Math.random()*replies.length)],time,mine:false});
+    renderChatMessages(room);
+  }, 1200);
+}
+
+// =============================================
+// ADMIN TABLES
+// =============================================
+function renderUsersTable(filterText='',filterRole='') {
+  const tbody = document.getElementById('users-tbody');
+  let users = USERS;
+  if(filterText) users = users.filter(u=>u.name.toLowerCase().includes(filterText.toLowerCase())||u.email.toLowerCase().includes(filterText.toLowerCase()));
+  if(filterRole) users = users.filter(u=>u.role===filterRole);
+  tbody.innerHTML = users.map(u=>`
+    <tr>
+      <td><div class="flex items-center gap-8"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--neon-green),var(--neon-cyan));display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:0.75rem;color:#000;font-weight:700">${u.name.charAt(0)}</div><b>${u.name}</b></div></td>
+      <td class="text-secondary text-sm">${u.email}</td>
+      <td><span class="badge badge-${u.role}">${u.role.toUpperCase()}</span></td>
+      <td><span class="badge badge-${u.status==='active'?'free':u.status==='suspended'?'upcoming':'banned'}">${u.status.toUpperCase()}</span></td>
+      <td>${u.leagues}</td>
+      <td class="text-secondary text-sm">${u.joined}</td>
+      <td>
+        <div class="flex gap-8">
+          ${u.role!=='admin'?`<button class="btn btn-ghost btn-sm" onclick="showToast('Made admin: ${u.name}','success')">PROMOTE</button>`:''}
+          ${u.status==='active'?`<button class="btn btn-danger btn-sm" onclick="showToast('${u.name} suspended','warn')">SUSPEND</button>`:`<button class="btn btn-secondary btn-sm" onclick="showToast('${u.name} restored','success')">RESTORE</button>`}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterUsers(val) { renderUsersTable(val); }
+function filterUserRole(val) { renderUsersTable('',val); }
+
+function renderAdminLeagues() {
+  const tbody = document.getElementById('admin-leagues-tbody');
+  tbody.innerHTML = LEAGUES.map(l=>`
+    <tr>
+      <td><b>${l.name}</b></td>
+      <td><span class="badge badge-${l.type}">${l.type.toUpperCase()}</span></td>
+      <td>${l.players}/${l.maxPlayers}</td>
+      <td class="text-gold font-head">KES ${l.prize.toLocaleString()}</td>
+      <td><span class="badge badge-${l.status}">${l.status.toUpperCase()}</span></td>
+      <td>
+        <div class="flex gap-8">
+          <button class="btn btn-ghost btn-sm" onclick="showToast('Fixtures generated for ${l.name}!','success')">GEN FIXTURES</button>
+          <button class="btn btn-danger btn-sm" onclick="showToast('League archived','warn')">ARCHIVE</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderPendingMatches() {
+  const el = document.getElementById('pending-matches-list');
+  const pending = FIXTURES.filter(f=>f.status==='scheduled').slice(0,3);
+  el.innerHTML = pending.map(f=>`
+    <div class="card" style="display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center">
+      <div>
+        <div class="font-head" style="font-size:0.9rem">${f.home} <span class="text-muted">vs</span> ${f.away}</div>
+        <div class="text-secondary text-sm">${f.league} · ${f.date}</div>
+      </div>
+      <div class="flex gap-8">
+        <button class="btn btn-primary btn-sm" onclick="openResultModal('${f.home}','${f.away}')">INPUT RESULT</button>
+        <button class="btn btn-ghost btn-sm" onclick="showToast('Match approved','success')">APPROVE</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderAllMatchesTable() {
+  const tbody = document.getElementById('all-matches-tbody');
+  tbody.innerHTML = FIXTURES.map(f=>`
+    <tr>
+      <td><b>${f.home}</b> vs <b>${f.away}</b></td>
+      <td class="text-secondary text-sm">${f.league}</td>
+      <td class="font-head">${f.score||'—'}</td>
+      <td class="text-secondary text-sm">${f.date}</td>
+      <td><span class="fixture-status status-${f.status}">${f.status==='live'?'🔴 LIVE':f.status==='done'?'DONE':'SCHEDULED'}</span></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="openResultModal('${f.home}','${f.away}')">EDIT</button></td>
+    </tr>
+  `).join('');
+}
+
+function renderPaymentsTable() {
+  const tbody = document.getElementById('payments-tbody');
+  tbody.innerHTML = PAYMENTS.map(p=>`
+    <tr>
+      <td class="font-mono text-xs text-muted">${p.id}</td>
+      <td><b>${p.player}</b></td>
+      <td class="text-secondary text-sm">${p.type}</td>
+      <td class="text-green font-head">${p.amount}</td>
+      <td>${p.method}</td>
+      <td class="font-mono text-xs">${p.ref}</td>
+      <td><span class="badge badge-${p.status==='confirmed'?'free':p.status==='pending'?'upcoming':'banned'}">${p.status.toUpperCase()}</span></td>
+      <td>
+        ${p.status==='pending'?`<button class="btn btn-primary btn-sm" onclick="showToast('Payment verified!','success')">VERIFY</button>`:''}
+        ${p.status==='failed'?`<button class="btn btn-ghost btn-sm" onclick="showToast('Retry initiated','warn')">RETRY</button>`:''}
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderSubsTable() {
+  const tbody = document.getElementById('subs-tbody');
+  tbody.innerHTML = SUBS.map(s=>`
+    <tr>
+      <td><b>${s.player}</b></td>
+      <td>${s.plan}</td>
+      <td class="text-secondary text-sm">${s.start}</td>
+      <td class="text-secondary text-sm">${s.expires}</td>
+      <td><span class="badge badge-${s.status==='active'?'free':'completed'}">${s.status.toUpperCase()}</span></td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="showToast('Access revoked','warn')">REVOKE</button>
+        ${s.status==='expired'?`<button class="btn btn-primary btn-sm" onclick="showToast('Subscription extended','success')">EXTEND</button>`:''}
+      </td>
+    </tr>
+  `).join('');
+}
+
+// =============================================
+// CHARTS
+// =============================================
+function renderCharts() {
+  const months = ['JUL','AUG','SEP','OCT','NOV','DEC'];
+  const revenues = [42,65,58,89,112,143];
+  const activity = [320,410,388,520,671,847];
+
+  const revMax = Math.max(...revenues);
+  const actMax = Math.max(...activity);
+
+  const revChart = document.getElementById('revenue-chart');
+  const revLabels = document.getElementById('revenue-chart-labels');
+  if(revChart) {
+    revChart.innerHTML = revenues.map((v,i)=>`
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center">
+        <div class="chart-bar" style="height:${Math.round(v/revMax*100)}%;width:100%" title="${months[i]}: ${v}K KES">
+          <span class="chart-bar-val">${v}K</span>
+        </div>
+      </div>
+    `).join('');
+    revLabels.innerHTML = months.map(m=>`<div class="chart-bar-label" style="flex:1;text-align:center">${m}</div>`).join('');
+  }
+
+  const actChart = document.getElementById('activity-chart');
+  const actLabels = document.getElementById('activity-chart-labels');
+  if(actChart) {
+    actChart.innerHTML = activity.map((v,i)=>`
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center">
+        <div class="chart-bar" style="height:${Math.round(v/actMax*100)}%;width:100%;background:rgba(0,207,255,0.08);border-color:rgba(0,207,255,0.2)" title="${months[i]}: ${v} players">
+          <span class="chart-bar-val" style="color:var(--neon-cyan)">${v}</span>
+        </div>
+      </div>
+    `).join('');
+    actLabels.innerHTML = months.map(m=>`<div class="chart-bar-label" style="flex:1;text-align:center">${m}</div>`).join('');
+  }
+}
+
+// =============================================
+// MODALS
+// =============================================
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.addEventListener('click', e=>{
+  if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('open');
+});
+
+function joinLeague() {
+  closeModal('join-league-modal');
+  openModal('payment-modal');
+}
+
+function processPayment() {
+  closeModal('payment-modal');
+  showToast('STK push sent to your M-Pesa! Enter PIN to complete.','success');
+  setTimeout(()=>showToast('Payment confirmed! Welcome to the league 🏆','success'),3000);
+}
+
+function saveProfile() {
+  const u = document.getElementById('edit-username').value;
+  document.getElementById('profile-username').textContent = u;
+  document.getElementById('profile-handle').textContent = '@'+u.toLowerCase().replace(/\s/g,'');
+  state.currentUser.username = u;
+  document.getElementById('welcome-title').textContent = `READY TO DOMINATE, ${u.toUpperCase()}?`;
+  closeModal('edit-profile-modal');
+  showToast('Profile updated!','success');
+}
+
+function setAvatar(emoji) {
+  state.userAvatar = emoji;
+  document.getElementById('user-avatar').textContent = emoji;
+  document.getElementById('profile-avatar-display').textContent = emoji;
+}
+
+function createLeague() {
+  const name = document.getElementById('new-league-name').value;
+  if(!name){showToast('Enter league name','error');return;}
+  LEAGUES.push({id:LEAGUES.length+1,name,type:document.getElementById('new-league-type').value,status:'upcoming',players:0,maxPlayers:parseInt(document.getElementById('new-league-max').value),prize:parseInt(document.getElementById('new-league-prize').value)||0,entry:parseInt(document.getElementById('new-league-fee').value)||0,description:'New league.',rules:'Standard rules.',start:'TBD',joined:false});
+  closeModal('create-league-modal');
+  renderAdminLeagues();
+  showToast(`League "${name}" created!`,'success');
+}
+
+function addUser() {
+  closeModal('add-user-modal');
+  showToast('User created and invitation email sent!','success');
+}
+
+function postAnnouncement() {
+  const title = document.getElementById('ann-title').value;
+  const body = document.getElementById('ann-body').value;
+  if(!title||!body){showToast('Fill in title and message','error');return;}
+  showToast(`Announcement "${title}" published!`,'success');
+  document.getElementById('ann-title').value='';
+  document.getElementById('ann-body').value='';
+}
+
+function selectPayMethod(el) {
+  document.querySelectorAll('.pay-method').forEach(m=>m.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// =============================================
+// NOTIFICATIONS
+// =============================================
+function toggleNotif() {
+  document.getElementById('notif-panel').classList.toggle('open');
+}
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.notif-btn')&&!e.target.closest('.notif-panel')) {
+    document.getElementById('notif-panel').classList.remove('open');
+  }
+});
+
+// =============================================
+// TOAST
+// =============================================
+function showToast(msg, type='success') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type==='error'?'error':type==='warn'?'warn':''}`;
+  toast.innerHTML = `<div class="toast-title">${type==='success'?'✅':type==='error'?'❌':'⚠️'} ${type==='success'?'Success':type==='error'?'Error':'Warning'}</div><div class="toast-msg">${msg}</div>`;
+  container.appendChild(toast);
+  setTimeout(()=>{ toast.style.opacity='0'; toast.style.transform='translateX(100%)'; toast.style.transition='all 0.3s'; setTimeout(()=>toast.remove(),300); }, 4000);
+}
+
+// =============================================
+// INIT
+// =============================================
+// Show login page
+document.getElementById('page-auth').classList.add('active');
+
+// Keyboard shortcut: Enter in chat
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
+    document.getElementById('notif-panel').classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>
